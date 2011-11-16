@@ -1,0 +1,4 @@
+The Django DataTables library provides a reusable Django application to easily
+integrate the DataTables jQuery plugin into a project.
+
+It is currently in the design and planning stage.
