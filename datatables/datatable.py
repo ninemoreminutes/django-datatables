@@ -1,6 +1,8 @@
 # Django
 from django.utils.copycompat import deepcopy
 from django.utils.datastructures import SortedDict
+from django.utils.safestring import mark_safe
+from django.utils import simplejson
 
 # Django DataTables
 from columns import Column, BoundColumn
@@ -12,6 +14,47 @@ class DataTableOptions(object):
 
     def __init__(self, options=None):
         self.model = getattr(options, 'model', None)
+        self.options = {}
+        for name in dir(options):
+            if name.startswith('_'):
+                continue
+            value = getattr(options, name)
+            try:
+                self.options[name] = self._hungarian_to_python(name, value)
+            except NameError:
+                pass
+
+    def _hungarian_to_python(self, name, value):
+        """Validate DataTable Meta options in Hungarian notation."""
+        if name.startswith('fn') and name[2].isupper():
+            return value
+        elif name.startswith('n') and name[1].isupper():
+            return value
+        elif name.startswith('m') and name[1].isupper():
+            return value
+        elif name.startswith('o') and name[1].isupper():
+            d = {}
+            for k, v in dict(value).iteritems():
+                d[k] = self._hungarian_to_python(k, v)
+            return d
+        elif name.startswith('a') and name[1].isupper():
+            return list(value)
+        elif name.startswith('a') and name[1] in 'abfimnos' and name[2].isupper():
+            a = []
+            for i in list(value):
+                a.append(self._hungarian_to_python(name[1:], i))
+            return a
+        elif name.startswith('s') and name[1].isupper():
+            return unicode(value)
+        elif name.startswith('b') and name[1].isupper():
+            return bool(value)
+        elif name.startswith('f') and name[1].isupper():
+            return float(value)
+        elif name.startswith('i') and name[1].isupper():
+            return int(value)
+        else:
+            raise NameError, 'name "%s" is not in hungarian notation' % name
+
 
 class DataTableDeclarativeMeta(type):
     """Metaclass for capturing declarative attributes on a DataTable class."""
@@ -22,6 +65,7 @@ class DataTableDeclarativeMeta(type):
         columns.sort(key=lambda x: x[1].creation_counter)
         for base in reversed(bases):
             columns = getattr(base, 'base_columns', {}).items() + columns
+        attrs['base_columns'] = SortedDict(columns)
         new_class = super(DataTableDeclarativeMeta, cls).__new__(cls, name, bases, attrs)
         new_class._meta = DataTableOptions(getattr(new_class, 'Meta', None))
         return new_class
@@ -31,7 +75,7 @@ class DataTable(object):
 
     __metaclass__ = DataTableDeclarativeMeta
 
-    def __init__(self, **kwargs):
+    def __init__(self, data=None, name=''):
         self.columns = deepcopy(self.base_columns)
 
     def bound_columns(self):
@@ -41,34 +85,12 @@ class DataTable(object):
                 for name, column in self.columns.items()])
         return self._bound_columns
 
-    def sort_field_choices(self):
-        return [(name, bf.label) for name, bf in self.bound_fields().items() if bf.sortable]
-
-    def display_field_choices(self):
-        return [(name, bf.label) for name, bf in self.bound_fields().items() if bf.display_field]
-
-
     def queryset(self):
         """Return the base queryset to be used for this table."""
         return self._meta.model._default_manager.get_query_set()
 
     def apply_ordering(self, qs):
-        sort_fields = []
-        group_forms = self.group_forms()
-        for group_name in sorted(group_forms.keys()):
-            group_form = group_forms[group_name]
-            if group_form.is_valid():
-                field_name = group_form.cleaned_data['o']
-                bf = self.bound_fields()[field_name]
-                if not bf.sortable:
-                    continue
-                sort_field = bf.sort_field
-                direction = group_form.cleaned_data['d']
-                sort_field = direction + sort_field
-                if sort_field not in sort_fields:
-                    sort_fields.append(sort_field)
-        print sort_fields
-        qs = qs.order_by(*sort_fields)
+        #qs = qs.order_by(*sort_fields)
         return qs
 
     def results(self):
@@ -76,18 +98,25 @@ class DataTable(object):
         qs = self.apply_ordering(qs)
         
         
-        column_names = [x[0] for x in self.columns()]
-        for row in qs:
-            d = {}
-            for name, bf in self.bound_fields().items():
-                if name not in column_names:
-                    continue
-                df = bf.display_field.replace('__', '.')
-                d[name] = lookupattr(row, df, None)
-            yield d
+        #column_names = [x[0] for x in self.columns()]
+        #for row in qs:
+        #    d = {}
+        #    for name, bf in self.bound_fields().items():
+        #        if name not in column_names:
+        #            continue
+        #        df = bf.display_field.replace('__', '.')
+        #        d[name] = lookupattr(row, df, None)
+        #    yield d
+        return iter(qs)
 
-    def as_html(self):
+    def json_options(self):
+        return mark_safe(simplejson.dumps(self._meta.options))
+
+    def has_response(self):
+        return False
+
+    def get_response(self, request=None):
         pass
 
-    def as_csv(self):
+    def as_html(self):
         pass
