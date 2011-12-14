@@ -1,11 +1,19 @@
-<table id="{{ list.id }}" width="100%" border="0" cellpadding="0" cellspacing="0">
+{% load lookupattr %}
+<table id="{{ table.id }}" width="100%" border="0" cellpadding="0" cellspacing="0">
     <thead>
         <tr>
-        {% for column in list.columns %}
-            <th>{{ column.1 }}</th>
+        {% for name, bound_column in table.bound_columns.items %}
+            <th>{{ bound_column.label }}</th>
         {% endfor %}
         </tr>
     </thead>
     <tbody>
+        {% for row in table.results %}
+        <tr>
+            {% for name, bound_column in table.bound_columns.items %}
+            <td>{{ row|lookupattr:bound_column.display_field }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
     </tbody>
 </table>

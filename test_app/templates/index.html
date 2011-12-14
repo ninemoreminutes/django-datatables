@@ -1,7 +1,18 @@
 {% extends 'base.html' %}
 
+{% block extrahead %}
+{{ block.super }}
+<link href="{{ STATIC_URL }}css/demo_table.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="{{ STATIC_URL}}js/jquery-1.7.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL}}js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
 {% block content %}
+{{ table.as_html }}
 <script type="text/javascript">
-x = {{ table.json_options }};
+$(document).ready(function() {
+    $('#{{ table.id }}').dataTable({{ table.json_options }});
+});
 </script>
+
 {% endblock %}

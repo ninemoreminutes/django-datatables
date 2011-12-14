@@ -1,4 +1,6 @@
 # Django
+from django.template import Context
+from django.template.loader import select_template
 from django.utils.copycompat import deepcopy
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
@@ -13,6 +15,7 @@ class DataTableOptions(object):
     """Container class for DataTable options defined via the Meta class."""
 
     def __init__(self, options=None):
+        self.id = getattr(options, 'id', 'datatable_%d' % id(self))
         self.model = getattr(options, 'model', None)
         self.options = {}
         for name in dir(options):
@@ -78,6 +81,10 @@ class DataTable(object):
     def __init__(self, data=None, name=''):
         self.columns = deepcopy(self.base_columns)
 
+    @property
+    def id(self):
+        return self._meta.id
+
     def bound_columns(self):
         if not getattr(self, '_bound_columns', None):
             self._bound_columns = SortedDict([
@@ -119,4 +126,5 @@ class DataTable(object):
         pass
 
     def as_html(self):
-        pass
+        t = select_template(['datatables/table.html'])
+        return t.render(Context({'table': self}))
