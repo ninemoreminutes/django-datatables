@@ -94,7 +94,9 @@ class DataTable(object):
 
     def queryset(self):
         """Return the base queryset to be used for this table."""
-        return self._meta.model._default_manager.get_query_set()
+        #qs = self._meta.model._default_manager.get_query_set()
+        qs = self.get_queryset()
+        return qs
 
     def apply_ordering(self, qs):
         #qs = qs.order_by(*sort_fields)
@@ -117,7 +119,38 @@ class DataTable(object):
         return iter(qs)
 
     def json_options(self):
-        return mark_safe(simplejson.dumps(self._meta.options))
+        options = self._meta.options
+        columns = self.bound_columns()
+        count = 0
+        options['aoColumnDefs'] = []
+        hidden_columns = []
+        sort_columns = []
+        unsearchable_columns = []
+        for name in columns.keys():
+            sort_columns.append([])
+        for name, column in columns.items():
+            # Make list of hidden columns
+            if not column.visible:
+                hidden_columns.append(count)
+            # Make list of sort_by columns
+            if column.sort_field != name:
+                if column.sort_field in columns.keys():
+                    sort_columns[columns.keys().index(column.sort_field)].append(count)
+            # Make list of unsearchable columns
+            if not column.searchable:
+                unsearchable_columns.append(count)
+            count += 1
+        # Apply hidden_columns
+        if len(hidden_columns) > 0:
+            options['aoColumnDefs'].append({'bVisible': False, 'aTargets': hidden_columns})
+        # Apply sort_fields
+        for number, targets in enumerate(sort_columns):
+            if len(targets) > 0:
+                options['aoColumnDefs'].append({'iDataSort': number, 'aTargets': targets})
+        # Apply unsearchable_columns
+        if len(unsearchable_columns) > 0:
+            options['aoColumnDefs'].append({'bSearchable': False, 'aTargets': unsearchable_columns})
+        return mark_safe(simplejson.dumps(options))
 
     def has_response(self):
         return False

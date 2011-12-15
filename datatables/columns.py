@@ -11,6 +11,8 @@ class Column(object):
         self.model_field = kwargs.get('model_field', None)
         self.display_field = kwargs.get('display_field', None)
         self.sort_field = kwargs.get('sort_field', None)
+        self.visible = kwargs.get('visible', True)
+        self.searchable = kwargs.get('searchable', True)
         self.renderer = kwargs.get('renderer', None)
         # Increase the creation counter, and save our local copy.
         self.creation_counter = Column.creation_counter
@@ -23,6 +25,8 @@ class BoundColumn(object):
         self.data_table = data_table
         self.column = column
         self.name = name
+        self.visible = self.column.visible
+        self.searchable = self.column.searchable
         if self.column.label is None:
             self.label = self.name.replace('_', ' ').title()
         else:
