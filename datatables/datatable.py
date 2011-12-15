@@ -126,6 +126,8 @@ class DataTable(object):
         hidden_columns = []
         sort_columns = []
         unsearchable_columns = []
+        unsortable_columns = []
+        sclasses = {}
         for name in columns.keys():
             sort_columns.append([])
         for name, column in columns.items():
@@ -139,6 +141,14 @@ class DataTable(object):
             # Make list of unsearchable columns
             if not column.searchable:
                 unsearchable_columns.append(count)
+            # Make list of unsortable columns
+            if not column.sortable:
+                unsortable_columns.append(count)
+            # Make dictionary of classes
+            if column.sclass:
+                if column.sclass not in sclasses.keys():
+                    sclasses[column.sclass] = []
+                sclasses[column.sclass].append(count)
             count += 1
         # Apply hidden_columns
         if len(hidden_columns) > 0:
@@ -150,6 +160,13 @@ class DataTable(object):
         # Apply unsearchable_columns
         if len(unsearchable_columns) > 0:
             options['aoColumnDefs'].append({'bSearchable': False, 'aTargets': unsearchable_columns})
+        # Apply unsortable columns
+        if len(unsortable_columns) > 0:
+            options['aoColumnDefs'].append({'bSortable': False, 'aTargets': unsortable_columns})
+        # Apply classes
+        if len(sclasses) > 0:
+            for name, target in sclasses.items():
+                options['aoColumnDefs'].append({'sClass': name, 'aTargets': target})
         return mark_safe(simplejson.dumps(options))
 
     def has_response(self):

@@ -12,8 +12,8 @@ class FortuneCookieTable(datatables.DataTable):
     #pk = datatables.CheckboxColumn()
     fortune = datatables.Column(label='Your Fortune', sort_field='fortune_lower')
     fortune_lower = datatables.Column(label='Lower Fortune', visible=False)
-    lucky_numbers = datatables.Column(display_field='lucky_numbers_display', searchable=False)
-    chinese_word = datatables.Column(label='Chinese Word', sort_field='chinese_word.english_word', searchable=False)
+    lucky_numbers = datatables.Column(display_field='lucky_numbers_display', sclass='okie')
+    chinese_word = datatables.Column(label='Chinese Word', sort_field='chinese_word.english_word', sclass='okie')
 
     def get_queryset(self):
         #qs = super(FortuneCookieTable, self).get_queryset()
