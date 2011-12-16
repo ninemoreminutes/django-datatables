@@ -8,7 +8,7 @@ def dumpjs(obj, *args, **kwargs):
     """Dump a Python object as Javascript, with support for a __json__ method."""
     class Encoder(simplejson.JSONEncoder):
         def iterencode(self, o, _one_shot=False):
-            print o
+            #print o
             if hasattr(o, '__json__'):
                 if callable(o.__json__):
                     print 'foo', o
@@ -18,6 +18,7 @@ def dumpjs(obj, *args, **kwargs):
             else:
                 return super(Encoder, self).iterencode(o, _one_shot=_one_shot)
     kwargs['cls'] = Encoder
+    kwargs['sort_keys'] = True
     return simplejson.dumps(obj, *args, **kwargs)
 
 class fn(object):
@@ -37,7 +38,9 @@ class fn(object):
 
 def hungarian_to_python(name, value):
     """Validate DataTable options specified in Hungarian notation."""
-    if name.startswith('fn') and name[2].isupper():
+    if value is None:
+        return value
+    elif name.startswith('fn') and name[2].isupper():
         return fn(value)
     elif name.startswith('n') and name[1].isupper():
         return value
