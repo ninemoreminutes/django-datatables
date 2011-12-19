@@ -1,5 +1,7 @@
 {% load lookupattr %}
-<table id="{{ table.id }}" class="{{ table.classes }}" width="300px" border="0" cellpadding="0" cellspacing="0">
+<table id="{{ table.id }}" class="{{ table.classes }}" width="{{ table.width }}"
+       border="{{ table.border }}" cellpadding="{{ table.cellpadding }}"
+       cellspacing="{{ table.cellspacing }}">
     <thead>
         <tr>
         {% for name, bound_column in table.bound_columns.items %}

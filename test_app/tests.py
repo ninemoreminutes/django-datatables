@@ -1,5 +1,9 @@
+# Python
+import json
+
 # Django
 from django.test import TestCase
+from django.utils.datastructures import SortedDict
 
 # Django-DataTables
 import datatables
@@ -7,11 +11,13 @@ import datatables
 class TestDataTables(TestCase):
     """Test cases for Django-DataTables app."""
 
+    fixtures = ['fortunecookies']
+
     def test_hungarian_to_python(self):
-        #fndef = 'function(oSettings, json) { alert("Init Complete!"); }'
-        #result = datatables.hungarian_to_python('fnInitComplete', fndef)
-        #self.assertEqual(unicode(result), fndef)
-        #self.assertEqual(datatables.utils.dumpjs(result), fndef)
+        fndef = 'function(oSettings, json) { alert("Init Complete!"); }'
+        result = datatables.hungarian_to_python('fnInitComplete', fndef)
+        self.assertEqual(unicode(result), fndef)
+        self.assertEqual(datatables.utils.dumpjs(result), fndef)
         result = datatables.hungarian_to_python('bVisible', 1)
         self.assertTrue(isinstance(result, bool))
         self.assertTrue(result)
@@ -19,537 +25,261 @@ class TestDataTables(TestCase):
     def test_lookupattr(self):
         pass
 
-    def test_class_meta_options(self):
-        class DT1(datatables.DataTable):
-            pass
-
-    def test_column_options(self):
-        pass
-
-    fixtures = ['fortunecookies',]
-
-    # Test Features
-
-    def test_bAutoWidth(self):
+    def _test_meta_options(self, **kwargs):
+        dumps = json.dumps
         class DT(datatables.DataTable):
-            class Meta:
-                bAutoWidth = True
-        
-        dt = DT()
-        js_options = dt.js_options()
-        
-        self.assertTrue('"bAutoWidth": true' in js_options)
-
-    def test_bDeferRender(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bDeferRender = True
-        
-        dt = DT()
-        js_options = dt.js_options()
-        
-        self.assertTrue('"bDeferRender": true' in js_options)
-
-    def test_bFilter(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bFilter = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bFilter": true' in js_options)
-
-    def test_bInfo(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bInfo = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bInfo": true' in js_options)
-        
-    def test_bJQueryUI(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bJQueryUI = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bJQueryUI": true' in js_options)
-
-    def test_bLengthChange(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bLengthChange = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bLengthChange": true' in js_options)
-
-    def test_bPaginate(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bPaginate = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bPaginate": true' in js_options)
-
-    def test_bProcessing(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bProcessing = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bProcessing": true' in js_options)
-        
-    def test_bScrollInfinite(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bScrollInfinite = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bScrollInfinite": true' in js_options)
-        
-    def test_bSort(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bSort = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bSort": true' in js_options)
-        
-    def test_bSortClasses(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bSortClasses = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bSortClasses": true' in js_options)
-        
-    def test_bStateSave(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bStateSave = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bStateSave": true' in js_options)
-
-    def test_sScrollX(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sScrollX = '100%'
-
-        dt = DT()
-        js_options = dt.js_options()
-        
-        self.assertTrue('"sScrollX": "100%"' in js_options)
-
-    def test_sScrollY(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sScrollY = '100%'
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"sScrollY": "100%"' in js_options)
-
-    # Test Options
-    
-    def test_aaData(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                aaData = [
-                            ['Trident', 'Internet Explorer 4.0', 'Win 95+', 4, 'X'],
-                            ['Trident', 'Internet Explorer 5.0', 'Win 95+', 5, 'C'],
-                         ]
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aaData": [["Trident", "Internet Explorer 4.0", "Win 95+", 4, "X"], ["Trident", "Internet Explorer 5.0", "Win 95+", 5, "C"]]' in js_options)
-        
-    def test_aaSorting(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                aaSorting = [[2,'asc'], [3,'desc']]
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aaSorting": [[2, "asc"], [3, "desc"]]' in js_options)
-        
-    def test_aaSortingFixed(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                aaSortingFixed = [[0,'asc']]
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aaSortingFixed": [[0, "asc"]]' in js_options)
-
-    def test_aLengthMenu(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                aLengthMenu = [[10, 25, 50, -1], [10, 25, 50, "All"]]
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aLengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]' in js_options)
-        
-    def test_aoSearchCols(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                aoSearchCols = [
-                                    None,
-                                    { "sSearch": "My filter" },
-                                    None,
-                                    { "sSearch": "^[0-9]", "bEscapeRegex": False }
-                               ]
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aoSearchCols": [null, {"sSearch": "My filter"}, null, {"bEscapeRegex": false, "sSearch": "^[0-9]"}]' in js_options)
-
-    def test_asStripClasses(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                asStripClasses = [ 'strip1', 'strip2', 'strip3' ]
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"asStripClasses": ["strip1", "strip2", "strip3"]' in js_options)
-
-    def test_bDestroy(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bDestroy = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bDestroy": true' in js_options)
-
-    def test_bRetrieve(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bRetrieve = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bRetrieve": true' in js_options)
-    
-    def test_bScrollCollapse(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bScrollCollapse = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bScrollCollapse": true' in js_options)
-        
-    def test_bSortCellsTop(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                bSortCellsTop = True
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"bSortCellsTop": true' in js_options)
-        
-    def test_iCookieDuration(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                iCookieDuration = 60*60*24
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"iCookieDuration": 86400' in js_options)
-
-    def test_iDeferLoading(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                iDeferLoading = 57
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"iDeferLoading": 57' in js_options)
-        
-    def test_iDisplayLength(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                iDisplayLength = 50
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"iDisplayLength": 50' in js_options)
-
-    def test_iDisplayStart(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                iDisplayStart = 20
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"iDisplayStart": 20' in js_options)
-
-    def test_iScrollLoadGap(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                iScrollLoadGap = 50
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"iScrollLoadGap": 50' in js_options)
-
-    def test_oSearch(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                oSearch = {"sSearch": "Initial search"}
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"oSearch": {"sSearch": "Initial search"}' in js_options)
-
-    def test_sAjaxDataProp(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sAjaxDataProp = "data"
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"sAjaxDataProp": "data"' in js_options)
-
-    def test_sAjaxSource(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sAjaxSource = "http://www.sprymedia.co.uk/dataTables/json.php"
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"sAjaxSource": "http://www.sprymedia.co.uk/dataTables/json.php"' in js_options)
-
-    def test_sCookiePrefix(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sCookiePrefix = "my_datatable_"
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"sCookiePrefix": "my_datatable_"' in js_options)
-
-    def test_sDom(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sDom = '<"top"i>rt<"bottom"flp><"clear"&lgt;'
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"sDom": "<\\"top\\"i>rt<\\"bottom\\"flp><\\"clear\\"&lgt;"' in js_options)
-
-    def test_sPaginationType(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sPaginationType = "full_numbers"
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"sPaginationType": "full_numbers"' in js_options)
-
-    def test_sScrollXInner(self):
-        class DT(datatables.DataTable):
-            class Meta:
-                sScrollXInner = "110%"
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"sScrollXInner": "110%"' in js_options)
-
-    # Test Callbacks
-    
-    # Test Columns
-
-    def test_asSorting(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(asSorting=[ "desc", "asc", "asc" ])
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"asSorting": ["desc", "asc", "asc"]' in js_options)
-
-    def test_bSearchable(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(bSearchable=False)
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0], "bSearchable": false' in js_options)
-
-    def test_bSortable(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(bSortable=False)
-            lucky_numbers = datatables.Column(bSortable=False)
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0, 1], "bSortable": false' in js_options)
-        
-    def test_bUseRendered(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(bUseRendered=False)
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0], "bUseRendered": false' in js_options)
-        
-    def test_bVisible(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(bVisible=False)
-            lucky_numbers = datatables.Column(bVisible=False)
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0, 1], "bVisible": false' in js_options)
-
-    def test_fnRender(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(fnRender=REPLACEME)
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"fnRender": REPLACEME, "aTargets": [0]' in js_options)
-        
-    def test_iDataSort(self):
+            Meta = type('Meta', (object,), kwargs)
+        js_options = DT().js_options()
+        for name, value in kwargs.items():
+            expected_js = dumps(name) + ': ' + dumps(value, sort_keys=True)
+            #print js_options, expected_js
+            self.assertTrue(expected_js in js_options)
+
+    def test_features(self):
+        # Test that all DataTables features are handled by the Meta class and
+        # included in the JS/JSON output from the DataTable class.
+        # http://datatables.net/usage/features
+        self._test_meta_options(bAutoWidth=True)
+        self._test_meta_options(bDeferRender=True)
+        self._test_meta_options(bFilter=True)
+        self._test_meta_options(bInfo=True)
+        self._test_meta_options(bJQueryUI=True)
+        self._test_meta_options(bLengthChange=True)
+        self._test_meta_options(bPaginate=True)
+        self._test_meta_options(bProcessing=True)
+        self._test_meta_options(bScrollInfinite=True)
+        self._test_meta_options(bSort=True)
+        self._test_meta_options(bSortClasses=True)
+        self._test_meta_options(bStateSave=True)
+        self._test_meta_options(sScrollX='100%')
+        self._test_meta_options(sScrollY='100%')
+
+    def test_options(self):
+        # Test that all DataTables options are handled by the Meta class and
+        # included in the JS/JSON output from the DataTable class.
+        # http://datatables.net/usage/options
+        aaData = [
+            ['Trident', 'Internet Explorer 4.0', 'Win 95+', 4, 'X'],
+            ['Trident', 'Internet Explorer 5.0', 'Win 95+', 5, 'C'],
+        ]
+        self._test_meta_options(aaData=aaData)
+        self._test_meta_options(aaSorting=[[2, 'asc'], [3, 'desc']])
+        self._test_meta_options(aaSortingFixed=[[0, 'asc']])
+        aLengthMenu = [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        self._test_meta_options(aLengthMenu=aLengthMenu)
+        aoSearchCols = [
+            None,
+            {'sSearch': 'My filter'},
+            None,
+            {'sSearch': '^[0-9]', 'bEscapeRegex': False}
+        ]
+        self._test_meta_options(aoSearchCols=aoSearchCols)
+        asStripClasses = ['strip1', 'strip2', 'strip3']
+        self._test_meta_options(asStripClasses=asStripClasses)
+        self._test_meta_options(bDestroy=True)
+        self._test_meta_options(bRetrieve=True)
+        self._test_meta_options(bScrollCollapse=True)
+        self._test_meta_options(bSortCellsTop=True)
+        self._test_meta_options(iCookieDuration=60*60*24)
+        self._test_meta_options(iDeferLoading=57)
+        self._test_meta_options(iDisplayLength=50)
+        self._test_meta_options(iDisplayStart=20)
+        self._test_meta_options(iScrollLoadGap=50)
+        self._test_meta_options(oSearch={'sSearch': 'Initial search'})
+        self._test_meta_options(sAjaxDataProp='data')
+        sAjaxSource = 'http://www.sprymedia.co.uk/dataTables/json.php'
+        self._test_meta_options(sAjaxSource=sAjaxSource)
+        self._test_meta_options(sCookiePrefix='my_datatable_')
+        self._test_meta_options(sDom='<"top"i>rt<"bottom"flp><"clear"&lgt;')
+        self._test_meta_options(sPaginationType='full_numbers')
+        self._test_meta_options(sScrollXInner='110%')
+
+    def test_callbacks(self):
+        # Test that all DataTables callbacks are handled by the Meta class and
+        # included in the JS/JSON output from the DataTable class.
+        # http://datatables.net/usage/callbacks
+        fnCookieCallback = '''function (sName, oData, sExpires, sPath) {
+            /* Customise oData or sName or whatever else here */
+            return sName + "="+JSON.stringify(oData)+"; expires=" + sExpires +"; path=" + sPath;
+        }'''
+        self._test_meta_options(fnCookieCallback=fnCookieCallback)
+        fnDrawCallback = '''function(oSettings) {
+            alert('DataTables has redrawn the table');
+        }'''
+        self._test_meta_options(fnDrawCallback=fnDrawCallback)
+        fnFooterCallback = '''function(nFoot, aasData, iStart, iEnd, aiDisplay) {
+            nFoot.getElementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
+        }'''
+        self._test_meta_options(fnFooterCallback=fnFooterCallback)
+        fnFormatNumber = '''function (iIn) {
+            return iIn;
+        }'''
+        self._test_meta_options(fnFormatNumber=fnFormatNumber)
+        fnHeaderCallback = '''function(nHead, aasData, iStart, iEnd, aiDisplay) {
+            nHead.getElementsByTagName('th')[0].innerHTML = "Displaying "+(iEnd-iStart)+" records";
+        }'''
+        self._test_meta_options(fnHeaderCallback=fnHeaderCallback)
+        fnInfoCallback = '''function(oSettings, iStart, iEnd, iMax, iTotal, sPre) {
+            return iStart +" to "+ iEnd;
+        }'''
+        self._test_meta_options(fnInfoCallback=fnInfoCallback)
+        fnInitComplete = '''function(oSettings, json) {
+            alert('DataTables has finished its initialisation.');
+        }'''
+        self._test_meta_options(fnInitComplete=fnInitComplete)
+        fnPreDrawCallback = '''function(oSettings) {
+            if ($('#test').val() == 1) {
+                return false;
+            }
+        }'''
+        self._test_meta_options(fnPreDrawCallback=fnPreDrawCallback)
+        fnRowCallback = '''function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+            /* Bold the grade for all 'A' grade browsers */
+            if ( aData[4] == "A" )
+            {
+                $('td:eq(4)', nRow).html( '<b>A</b>' );
+            }
+            return nRow;
+        }'''
+        self._test_meta_options(fnRowCallback=fnRowCallback)
+        fnServerData = '''function (sSource, aoData, fnCallback) {
+            /* Add some data to send to the source, and send as 'POST' */
+            aoData.push({ "name": "my_field", "value": "my_value" });
+            $.ajax({
+                "dataType": 'json', 
+                "type": "POST", 
+                "url": sSource, 
+                "data": aoData, 
+                "success": fnCallback
+            });
+        }'''
+        self._test_meta_options(fnServerData=fnServerData)
+        fnServerParams = '''function (aoData) {
+            aoData.push({"name": "more_data", "value": "my_value"});
+        }'''
+        self._test_meta_options(fnServerParams=fnServerParams)
+        fnStateLoadCallback = '''function (oSettings, oData) {
+            oData.sFilter = "";
+            return true;
+        }'''
+        self._test_meta_options(fnStateLoadCallback=fnStateLoadCallback)
+        fnStateSaveCallback = '''function (oSettings, sValue) {
+            sValue += ',"myCustomParameter": "myValue"';
+            return sValue;
+        }'''
+        self._test_meta_options(fnStateSaveCallback=fnStateSaveCallback)
+
+    def _test_column_options(self, **kwargs):
+        dumps = json.dumps
+        columns = SortedDict()
+        option_values = {}
+        for index, name in enumerate(kwargs.keys()):
+            options = kwargs[name]
+            columns[name] = datatables.Column(**options)
+            for k,v in options.items():
+                if k not in option_values:
+                    option_values[k] = []
+                if v not in [x[0] for x in option_values[k]]:
+                    option_values[k].append([v, []])
+                for x in option_values[k]:
+                    if x[0] == v:
+                        x[1].append(index)
+        DT = type('DT', (datatables.DataTable,), columns)
+        js_options = DT().js_options()
+        for oname, ovalues in option_values.items():
+            for ovalue, otargets in ovalues:
+                expected_js = dumps({
+                    'aTargets': otargets,
+                    oname: ovalue,
+                }, sort_keys=True).lstrip('{').rstrip('}').strip()
+            #print js_options, expected_js
+            self.assertTrue(expected_js in js_options)
+
+    def test_columns(self):
+        # Test that all DataTables column options are handled by the Column
+        # class and included in the JS/JSON output from the DataTable class.
+        # http://datatables.net/usage/columns
+        options = {
+            'fortune': {'asSorting': ['desc', 'asc', 'asc']},
+            'lucky_numbers': {},
+        }
+        # FIXME: self._test_column_options(**options)
+        options = {
+            'fortune': {'bSearchable': False},
+            'lucky_numbers': {},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'bSortable': False},
+            'lucky_numbers': {'bSortable': False},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'bUseRendered': False},
+            'lucky_numbers': {},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'bVisible': False},
+            'lucky_numbers': {'bVisible': False},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'fnRender': 'function (oObj) { return oObj.aData[oObj.iDataColumn]; }'},
+            'lucky_numbers': {},
+        }
+        # FIXME: self._test_column_options(**options)
+        options = {
+            'fortune': {'mDataProp': 'fortune_display'},
+            'lucky_numbers': {'mDataProp': 1},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'mDataProp': 'function(oObj) { return oObj.aData[0]; }'},
+            'lucky_numbers': {'mDataProp': None},
+        }
+        # FIXME: self._test_column_options(**options)
+        options = {
+            'fortune': {'sClass': 'my_class'},
+            'lucky_numbers': {'sClass': 'my_class'},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {},
+            'lucky_numbers': {'sDefaultContent': 'Edit'},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {},
+            'lucky_numbers': {'sName': 'lucky_number_column'},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'sSortDataType': 'dom-text'},
+            'lucky_numbers': {'sSortDataType': 'dom-text'},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'sTitle': 'My column title'},
+            'lucky_numbers': {},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'sType': 'html'},
+            'lucky_numbers': {'sType': 'html'},
+        }
+        self._test_column_options(**options)
+        options = {
+            'fortune': {'sWidth': '20%'},
+            'lucky_numbers': {},
+        }
+        self._test_column_options(**options)
+
+    def test_column_sorting(self):
         class DT(datatables.DataTable):
             fortune = datatables.Column(sort_field="lucky_numbers")
             lucky_numbers = datatables.Column()
 
         dt = DT()
         js_options = dt.js_options()
-
         self.assertTrue('"aTargets": [0], "iDataSort": 1' in js_options)
-
-    def test_mDataProp(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(mDataProp=REPLACEME)
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"mDataProp": REPLACEME, "aTargets": REPLACEME' in js_options)
-
-    def test_sClass(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(sClass="my_class")
-            lucky_numbers = datatables.Column(sClass="my_class")
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0, 1], "sClass": "my_class"' in js_options)
-
-    def test_sDefaultContent(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(sDefaultContent="Edit")
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0], "sDefaultContent": "Edit"' in js_options)
-
-    def test_sName(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column()
-            lucky_numbers = datatables.Column(sName="lucky_number_column")
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [1], "sName": "lucky_number_column"' in js_options)
-
-    def test_sSortDataType(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(sSortDataType="dom-text")
-            lucky_numbers = datatables.Column(sSortDataType="dom-text")
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0, 1], "sSortDataType": "dom-text"' in js_options)
-
-    def test_sTitle(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(sTitle="My column title")
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0], "sTitle": "My column title"' in js_options)
-        
-    def test_sType(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(sType="html")
-            lucky_numbers = datatables.Column(sType="html")
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0, 1], "sType": "html"' in js_options)
-        
-    def test_sWidth(self):
-        class DT(datatables.DataTable):
-            fortune = datatables.Column(sWidth="20%")
-            lucky_numbers = datatables.Column()
-
-        dt = DT()
-        js_options = dt.js_options()
-
-        self.assertTrue('"aTargets": [0], "sWidth": "20%"' in js_options)

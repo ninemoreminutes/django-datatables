@@ -87,7 +87,6 @@ def lookupattr(obj, name, default=None):
             attr = default
             break
         obj = attr
-
     if callable(attr):
         return attr()
     else:

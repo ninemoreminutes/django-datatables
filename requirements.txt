@@ -5,7 +5,7 @@ decorator==3.3.2
 Django==1.3.1
 -e git+git://github.com/ninemoreminutes/django-sortedm2m.git@d5a5e29820147e55d971ff6dc2cf73b1897c8ec1#egg=django_sortedm2m
 django-debug-toolbar==0.8.5
-django-fortunecookie==0.1.1
+django-fortunecookie==0.1.2
 django-setuptest==0.0.6
 docutils==0.8.1
 Jinja2==2.6

@@ -20,6 +20,10 @@ class DataTableOptions(object):
         if isinstance(self.classes, basestring):
             self.classes = self.classes.split()
         self.classes = set(self.classes)
+        self.width = str(getattr(options, 'width', '100%'))
+        self.border = str(getattr(options, 'border', '0'))
+        self.cellpadding = str(getattr(options, 'cellpadding', '0'))
+        self.cellspacing = str(getattr(options, 'cellspacing', '0'))
         self.model = getattr(options, 'model', None)
         self.options = {}
         for name in dir(options):
@@ -62,6 +66,22 @@ class DataTable(object):
     def classes(self):
         return ' '.join(self._meta.classes)
 
+    @property
+    def width(self):
+        return self._meta.width
+
+    @property
+    def border(self):
+        return self._meta.border
+
+    @property
+    def cellpadding(self):
+        return self._meta.cellpadding
+
+    @property
+    def cellspacing(self):
+        return self._meta.cellspacing
+
     def bound_columns(self):
         if not getattr(self, '_bound_columns', None):
             self._bound_columns = SortedDict([
@@ -87,17 +107,6 @@ class DataTable(object):
     def results(self):
         qs = self.get_queryset()
         qs = self.apply_ordering(qs)
-        
-        
-        #column_names = [x[0] for x in self.columns()]
-        #for row in qs:
-        #    d = {}
-        #    for name, bf in self.bound_fields().items():
-        #        if name not in column_names:
-        #            continue
-        #        df = bf.display_field.replace('__', '.')
-        #        d[name] = lookupattr(row, df, None)
-        #    yield d
         return iter(qs)
 
     def js_options(self):

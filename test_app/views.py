@@ -26,9 +26,10 @@ class FortuneCookieTable(datatables.DataTable):
         model = FortuneCookie
         bInfo = True
         bSort = True
-        bPaginate = False
-        sScrollY = '400px'
-        aaSorting = [[2, "desc"]]
+        #bPaginate = False
+        bJQueryUI = True
+        #sScrollY = '400px'
+        #aaSorting = [[2, "desc"]]
         #fnInitComplete = 'function(oSettings, json) { alert("Init Complete!"); }'
 
 @datatables.datatable(FortuneCookieTable, name='fct')
