@@ -19,7 +19,12 @@ def dumpjs(obj, *args, **kwargs):
                 return super(Encoder, self).iterencode(o, _one_shot=_one_shot)
     kwargs['cls'] = Encoder
     kwargs['sort_keys'] = True
-    return simplejson.dumps(obj, *args, **kwargs)
+    #return simplejson.dumps(obj, *args, **kwargs)
+    output = simplejson.dumps(obj, *args, **kwargs)
+    for key, val in obj.items():
+        if 'fn' == key[0:2]:
+            output = output.replace(simplejson.dumps(val), val)
+    return output
 
 class fn(object):
     """Wrapper for a Javascript function that should be encoded without escaping."""
@@ -34,7 +39,8 @@ class fn(object):
     def __json__(self):
         return unicode(self.fndef)
     def __deepcopy__(self, memo):
-        return self.__class__(deepcopy(self.fndef, memo))
+        return deepcopy(self.fndef, memo)
+        #return self.__class__(deepcopy(self.fndef, memo))
 
 def hungarian_to_python(name, value):
     """Validate DataTable options specified in Hungarian notation."""

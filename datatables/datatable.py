@@ -117,13 +117,23 @@ class DataTable(object):
         for index, name in enumerate(columns.keys()):
             column = columns[name]
             for key, value in column.options.items():
-                colopts[(key, value)] = colopts.get((key, value), []) + [index]
+                if not (key, str(value)) in colopts.keys():
+                    colopts[(key, str(value))] = {}
+                    colopts[(key, str(value))]['targets'] = []
+                colopts[(key, str(value))]['targets'] = colopts[(key, str(value))]['targets'] + [index]
+                colopts[(key, str(value))]['key'] = key
+                colopts[(key, str(value))]['value'] = value
             if column.sort_field != column.display_field and column.sort_field in columns:
                 key = 'iDataSort'
                 value = columns.keys().index(column.sort_field)
-                colopts[(key, value)] = colopts.get((key, value), []) + [index]
-        for kv, targets in colopts.items():
-            aoColumnDefs.append(dict([kv, ('aTargets', targets)]))
+                if not (key, str(value)) in colopts.keys():
+                    colopts[(key, str(value))] = {}
+                    colopts[(key, str(value))]['targets'] = []
+                colopts[(key, str(value))]['targets'] = colopts[(key, str(value))]['targets'] + [index]
+                colopts[(key, str(value))]['key'] = key
+                colopts[(key, str(value))]['value'] = value
+        for kv, values in colopts.items():
+            aoColumnDefs.append(dict([(values['key'], values['value']), ('aTargets', values['targets'])]))
         return mark_safe(dumpjs(options))
 
     def has_response(self):
