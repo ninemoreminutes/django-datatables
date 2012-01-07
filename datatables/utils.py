@@ -67,7 +67,7 @@ def hungarian_to_python(name, value):
     elif name.startswith('s') and name[1].isupper():
         return unicode(value)
     elif name.startswith('b') and name[1].isupper():
-        return bool(value)
+        return bool(str(value).lower() in ('t', 'true', 'yes', 'y', '1'))
     elif name.startswith('f') and name[1].isupper():
         return float(value)
     elif name.startswith('i') and name[1].isupper():

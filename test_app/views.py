@@ -10,10 +10,10 @@ from fortunecookie.models import *
 class FortuneCookieTable(datatables.DataTable):
 
     #pk = datatables.CheckboxColumn()
-    fortune = datatables.Column(label='Your Fortune', sort_field='fortune_lower')
+    fortune = datatables.Column(label='Your Fortune', sort_field='fortune_lower', bSearchable=False)
     fortune_lower = datatables.Column(label='Lower Fortune', bVisible=False)
-    lucky_numbers = datatables.Column(display_field='lucky_numbers_display', sClass='okie', asSorting=["asc", "desc", "desc"])
-    chinese_word = datatables.Column(label='Chinese Word', sort_field='chinese_word.english_word', sClass='okie')
+    lucky_numbers = datatables.Column(display_field='lucky_numbers_display', sClass='okie', asSorting=["asc", "desc", "desc"], bSearchable=False)
+    chinese_word = datatables.Column(label='Chinese Word', sort_field='chinese_word.english_word', sClass='okie', bSearchable=False)
 
     def get_queryset(self):
         qs = self.base_queryset()
@@ -30,8 +30,10 @@ class FortuneCookieTable(datatables.DataTable):
         bJQueryUI = True
         #sScrollY = '400px'
         aaSorting = [[2, "desc"]]
-        aLengthMenu = [[10, 25, 50, -1], [10, 25, 50, "All"]]
-        fnInitComplete = 'function(oSettings, json) { alert("Init Complete!"); }'
+        aLengthMenu = [[3, 10, 25, 50, -1], [3, 10, 25, 50, "All"]]
+        #fnInitComplete = 'function(oSettings, json) { alert("Init Complete!"); }'
+        bServerSide = True
+        sAjaxSource = '/'
 
 @datatables.datatable(FortuneCookieTable, name='fct')
 def index(request):

@@ -19,3 +19,9 @@
         {% endfor %}
     </tbody>
 </table>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#{{ table.id }}').dataTable({{ table.js_options }});
+});
+</script>

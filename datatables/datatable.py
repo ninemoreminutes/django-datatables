@@ -1,13 +1,15 @@
 # Django
+from django.http import HttpResponse
 from django.template import Context
 from django.template.loader import select_template
 from django.utils.copycompat import deepcopy
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
+from django.db.models import Q
 
 # Django DataTables
 from columns import Column, BoundColumn
-from utils import dumpjs, hungarian_to_python
+from utils import dumpjs, hungarian_to_python, lookupattr
 
 __all__ = ['DataTable']
 
@@ -104,10 +106,16 @@ class DataTable(object):
         #qs = qs.order_by(*sort_fields)
         return qs
 
-    def results(self):
+    def get_results(self):
         qs = self.get_queryset()
         qs = self.apply_ordering(qs)
-        return iter(qs)
+        return qs
+
+    def results(self):
+        if self._meta.options.get('bServerSide', False):
+            return ''
+        else:
+            return self.get_results()
 
     def js_options(self):
         options = deepcopy(self._meta.options)
@@ -136,11 +144,72 @@ class DataTable(object):
             aoColumnDefs.append(dict([(values['key'], values['value']), ('aTargets', values['targets'])]))
         return mark_safe(dumpjs(options))
 
-    def has_response(self):
-        return False
+    def process_request(self, request, name='datatable'):
+        setattr(request, name, self)
+        
+    def process_response(self, request, response):
+        if 'sEcho' in request.GET:# and request.is_ajax():
+            return self.handle_ajax(request)
+        else:
+            return response
 
-    def get_response(self, request=None):
-        pass
+    def handle_ajax(self, request):
+        params = {}
+        for name, value in request.GET.items():
+            try:
+                params[name] = hungarian_to_python(name, value)
+            except NameError:
+                pass
+        # Handle Sorting
+        sorting_cols = []
+        for count in range(params.get('iSortingCols', 0)):
+            sort_num = params['iSortCol_'+str(count)]
+            sort_dir = params['sSortDir_'+str(count)]
+            if sort_dir == 'desc':
+                sort_str = '-' + self.bound_columns()[self.bound_columns().keys()[sort_num]].sort_field
+            else:
+                sort_str = self.bound_columns()[self.bound_columns().keys()[sort_num]].sort_field
+            if params.get('bSortable_'+str(count), False):
+                sorting_cols.append(sort_str)
+        qs = self.get_queryset()
+        qs = qs.order_by(*sorting_cols)
+        # Handle Global Search
+        search_fields = []
+        search_term = params.get('sSearch', '')
+        if search_term:
+            for count in range(params.get('iColumns', 0)):
+                if params.get('bSearchable_'+str(count), True):
+                    search_fields.append(self.bound_columns()[self.bound_columns().keys()[count]])
+            qfilter = None
+            for field in search_fields:
+                # FIXME: Does not work for extra fields or foreignkey fields
+                q = Q(**{'%s__icontains' % field.model_field: search_term})
+                if qfilter is None:
+                    qfilter = q
+                else:
+                    qfilter |= q
+            if qfilter:
+                qs = qs.filter(qfilter)
+        # Handle Start and Length of display
+        start = params.get('iDisplayStart', 0)
+        end = params.get('iDisplayLength', self.get_results().count()) + start
+        qs = qs[start:end]
+        results = []
+        for result in qs:
+            row = []
+            for name, bound_column in self.bound_columns().items():
+                row.append(unicode(lookupattr(result, bound_column.display_field)))
+            results.append(row)
+        data = {
+            'iTotalRecords': self.get_results().count(),
+            'iTotalDisplayRecords': self.get_results().count(),
+            'sEcho': request.GET['sEcho'],
+            #'sColumns': ,
+            'aaData': list(results)
+        }
+        print qs.query
+        s = dumpjs(data)
+        return HttpResponse(s, content_type='application/json')
 
     def as_html(self):
         t = select_template(['datatables/table.html'])
