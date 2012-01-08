@@ -77,6 +77,7 @@ def hungarian_to_python(name, value):
 
 def lookupattr(obj, name, default=None):
     """Recursively lookup an attribute or key on an object."""
+    name = name.replace('__', '.')
     for element in name.split('.'):
         try:
             attr = obj.__getattribute__(element)

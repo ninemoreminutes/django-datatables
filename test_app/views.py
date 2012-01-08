@@ -10,10 +10,31 @@ from fortunecookie.models import *
 class FortuneCookieTable(datatables.DataTable):
 
     #pk = datatables.CheckboxColumn()
-    fortune = datatables.Column(label='Your Fortune', sort_field='fortune_lower', bSearchable=False)
-    fortune_lower = datatables.Column(label='Lower Fortune', bVisible=False)
-    lucky_numbers = datatables.Column(display_field='lucky_numbers_display', sClass='okie', asSorting=["asc", "desc", "desc"], bSearchable=False)
-    chinese_word = datatables.Column(label='Chinese Word', sort_field='chinese_word.english_word', sClass='okie', bSearchable=False)
+    fortune = datatables.Column(
+        label='Your Fortune',
+        sort_field='fortune_lower',
+        )
+
+    fortune_lower = datatables.Column(
+        label='Lower Fortune',
+        bVisible=False,
+        bSearchable=False,
+        )
+
+    lucky_numbers = datatables.Column(
+        display_field='lucky_numbers_display',
+        sClass='okie',
+        asSorting=["asc", "desc", "desc"],
+        bSearchable=False,
+        )
+
+    chinese_word = datatables.Column(
+        label='Chinese Word',
+        sort_field='chinese_word.english_word',
+        search_field='chinese_word.english_word',
+        sClass='okie',
+        #bSearchable=False,
+        )
 
     def get_queryset(self):
         qs = self.base_queryset()
@@ -26,9 +47,9 @@ class FortuneCookieTable(datatables.DataTable):
         model = FortuneCookie
         bInfo = True
         bSort = True
-        #bPaginate = False
+        bPaginate = False
         bJQueryUI = True
-        #sScrollY = '400px'
+        sScrollY = '200px'
         aaSorting = [[2, "desc"]]
         aLengthMenu = [[3, 10, 25, 50, -1], [3, 10, 25, 50, "All"]]
         #fnInitComplete = 'function(oSettings, json) { alert("Init Complete!"); }'

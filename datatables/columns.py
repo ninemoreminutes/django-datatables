@@ -16,6 +16,7 @@ class Column(object):
         'model_field': None,
         'display_field': None,
         'sort_field': None,
+        'search_field': None,
         #'visible': True,
         #'searchable': True,
         #'sortable': True,
@@ -50,7 +51,13 @@ class BoundColumn(object):
             self.label = self.name.replace('_', ' ').title()
         if self.model_field is None:
             self.model_field = self.name
+        self.model_field = self.model_field.replace('.', '__')
         if self.display_field is None:
             self.display_field = self.model_field
+        self.display_field = self.display_field.replace('.', '__')
         if self.sort_field is None:
             self.sort_field = self.model_field
+        self.sort_field = self.sort_field.replace('.', '__')
+        if self.search_field is None:
+            self.search_field = self.model_field
+        self.search_field = self.search_field.replace('.', '__')
