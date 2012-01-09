@@ -174,10 +174,11 @@ class DataTable(object):
             qs = qs.order_by(*sort_fields)
         return qs
 
-    def _handle_ajax_search(self, qs, params):
+    def _handle_ajax_global_search(self, qs, params):
         bc = self.bound_columns()
         search_fields = []
         sSearch = params.get('sSearch', '')
+        bRegex = params.get('bRegex', False)
         if sSearch:
             iColumns = params.get('iColumns', 0)
             for i in range(iColumns):
@@ -189,13 +190,46 @@ class DataTable(object):
             qfilter = None
             for search_field in search_fields:
                 # FIXME: Does not work for extra fields or foreignkey fields
-                q = Q(**{'%s__icontains' % search_field: sSearch})
+                if bRegex:
+                    q = Q(**{'%s__regex' % search_field: sSearch})
+                else:
+                    q = Q(**{'%s__icontains' % search_field: sSearch})
                 if qfilter is None:
                     qfilter = q 
                 else:
                     qfilter |= q
             if qfilter:
                 qs = qs.filter(qfilter)
+        return qs
+
+    def _handle_ajax_column_specific_search(self, qs, params):
+        bc = self.bound_columns()
+        search_fields = []
+        iColumns = params.get('iColumns', 0)
+        for i in range(iColumns):
+            bcol = bc.values()[i]
+            bSearchable = params.get('bSearchable_%d' % i, True)
+            bSearchable = bSearchable and bcol.options.get('bSearchable', True)
+            sSearch = params.get('sSearch_%d' % i, '')
+            bRegex = params.get('bRegex_%d' % i, False)
+            if bSearchable and sSearch:
+                search_fields.append({
+                    'field': bcol.search_field,
+                    'term': sSearch,
+                    'regex': bRegex,
+                })
+        qfilter = None
+        for search_field in search_fields:
+            if search_field['regex']:
+                q = Q(**{'%s__regex' % search_field['field']: search_field['term']})
+            else:
+                q = Q(**{'%s__icontains' % search_field['field']: search_field['term']})
+            if qfilter is None:
+                qfilter = q 
+            else:
+                qfilter |= q
+        if qfilter:
+            qs = qs.filter(qfilter)
         return qs
 
     def handle_ajax(self, request):
@@ -208,7 +242,8 @@ class DataTable(object):
         qs = self.get_queryset()
         iTotalRecords = qs.count()
         qs = self._handle_ajax_sorting(qs, params)
-        qs = self._handle_ajax_search(qs, params)
+        qs = self._handle_ajax_global_search(qs, params)
+        qs = self._handle_ajax_column_specific_search(qs, params)
         iTotalDisplayRecords = qs.count()
         iDisplayStart = params.get('iDisplayStart', 0)
         iDisplayLength = params.get('iDisplayLength', -1)

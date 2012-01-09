@@ -55,6 +55,7 @@ class FortuneCookieTable(datatables.DataTable):
         #fnInitComplete = 'function(oSettings, json) { alert("Init Complete!"); }'
         bServerSide = True
         sAjaxSource = '/'
+        #fnServerData = 'function( sUrl, aoData, fnCallback ) {$.ajax( {"url": sUrl, "data": aoData, "success": fnCallback, "dataType": "jsonp", "cache": false} );}'
 
 @datatables.datatable(FortuneCookieTable, name='fct')
 def index(request):
