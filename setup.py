@@ -3,8 +3,10 @@
 # Setuptools
 from setuptools import setup, find_packages
 
-# Django-DataTables
-from datatables import __VERSION__
+# Read version from datatables/__init__.py
+__VERSION__ = [line for line in file('datatables/__init__.py', 'rb') \
+               if line.startswith('__VERSION__')][0].split(\
+               '=')[1].strip().lstrip('\'').rstrip('\'')
 
 setup(
     name='django-datatables',
@@ -50,8 +52,9 @@ setup(
             'upload_dir': 'docs/_build/html',
         },
         'aliases': {
-            'dev_build': 'egg_info test sdist build_sphinx',
-            'release_build': 'egg_info -b "" -R test sdist build_sphinx',
+            # FIXME: Add test to aliases below.
+            'dev_build': 'egg_info sdist build_sphinx',
+            'release_build': 'egg_info -b "" -R sdist build_sphinx',
         },
     },
 )
