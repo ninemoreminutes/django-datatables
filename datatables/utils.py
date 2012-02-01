@@ -16,7 +16,7 @@ def dumpjs(obj, *args, **kwargs):
                 else:
                     return o.__json__
             else:
-                return super(Encoder, self).iterencode(o, _one_shot=_one_shot)
+                return super(Encoder, self).iterencode(o)#, _one_shot=_one_shot)
     kwargs['cls'] = Encoder
     kwargs['sort_keys'] = True
     #return simplejson.dumps(obj, *args, **kwargs)
