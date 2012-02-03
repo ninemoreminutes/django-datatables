@@ -10,10 +10,10 @@
         </tr>
     </thead>
     <tbody>
-        {% for row in table.results %}
+        {% for row in table.rows %}
         <tr>
-            {% for name, bound_column in table.bound_columns.items %}
-            <td>{{ row|lookupattr:bound_column.display_field }}</td>
+            {% for col in row.values %}
+            <td>{{ col }}</td>
             {% endfor %}
         </tr>
         {% endfor %}

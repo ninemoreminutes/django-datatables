@@ -1,10 +1,11 @@
 # Django
 from django.utils.copycompat import deepcopy
+from django.utils.safestring import mark_safe
 
 # Django-DataTables
-from utils import hungarian_to_python
+from utils import hungarian_to_python, lookupattr
 
-__all__ = ['Column']
+__all__ = ['Column', 'CheckboxColumn']
 
 class Column(object):
     """Specify options for a Column on a DataTable."""
@@ -37,6 +38,21 @@ class Column(object):
         self.creation_counter = Column.creation_counter
         Column.creation_counter += 1
 
+class CheckboxColumn(Column):
+    
+    def __init__(self, **kwargs):
+        kwargs.setdefault('renderer', self.render_checkbox)
+        kwargs.setdefault('label', mark_safe(u'<input type="checkbox"/>'))
+        kwargs.setdefault('bSortable', False)
+        super(CheckboxColumn, self).__init__(**kwargs)
+
+    def render_checkbox(self, result_row, bound_column):
+        if self.model_field:
+            checked = bool(lookupattr(result_row, bound_column.model_field))
+        else:
+            checked = False
+        return mark_safe(u'<input type="checkbox"/>')
+
 class BoundColumn(object):
     """A Column bound to a particular DataTable instance."""
 
@@ -61,3 +77,14 @@ class BoundColumn(object):
         if self.search_field is None:
             self.search_field = self.model_field
         self.search_field = self.search_field.replace('.', '__')
+
+    def render(self, row, include_hidden=True):
+        if not include_hidden and not self.options.bVisible:
+            return u''
+        elif self.renderer:
+            try:
+                return self.renderer(row, self)
+            except:
+                return u''
+        else:
+            return unicode(lookupattr(row, self.display_field))

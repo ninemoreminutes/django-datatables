@@ -91,32 +91,30 @@ class DataTable(object):
                 for name, column in self.columns.items()])
         return self._bound_columns
 
-    def base_queryset(self):
-        """Return the base queryset to be used for this table."""
-        return self._meta.model._default_manager.get_query_set()
+    def get_default_queryset(self):
+        """Return the default queryset to be used for this table."""
+        if self._meta.model:
+            return self._meta.model._default_manager.get_query_set()
+        else:
+            return EmptyQuerySet()
 
     def get_queryset(self):
         """Method for subclasses to override to customize the queryset."""
-        
-        return self.base_queryset()
+        return getattr(self, '_qs', self.get_default_queryset())
 
     def update_queryset(self, qs):
         self._qs = qs
 
-    def apply_ordering(self, qs):
-        #qs = qs.order_by(*sort_fields)
-        return qs
-
-    def get_results(self):
-        qs = self.get_queryset()
-        qs = self.apply_ordering(qs)
-        return qs
-
-    def results(self):
+    def rows(self):
         if self._meta.options.get('bServerSide', False):
-            return ''
+            qs = self.get_queryset().none()
         else:
-            return self.get_results()
+            qs = self.get_queryset()
+        for result in qs:
+            d = SortedDict()
+            for bcol in self.bound_columns().values():
+                d[bcol.name] = bcol.render(result)
+            yield d
 
     def js_options(self):
         options = deepcopy(self._meta.options)
@@ -254,10 +252,7 @@ class DataTable(object):
         for result in qs:
             aData = []
             for bcol in self.bound_columns().values():
-                if bcol.options.get('bVisible', True):
-                    aData.append(unicode(lookupattr(result, bcol.display_field)))
-                else:
-                    aData.append(u'')
+                aData.append(bcol.render(result, include_hidden=False))
             aaData.append(aData)
         data = {
             'iTotalRecords': iTotalRecords,
@@ -266,7 +261,7 @@ class DataTable(object):
             #'sColumns': ,
             'aaData': aaData,
         }
-        print qs.query
+        #print qs.query
         s = dumpjs(data)
         return HttpResponse(s, content_type='application/json')
 
