@@ -18,6 +18,7 @@ class DataTableOptions(object):
 
     def __init__(self, options=None):
         self.id = getattr(options, 'id', 'datatable_%d' % id(self))
+        self.var = getattr(options, 'var', None)
         self.classes = getattr(options, 'classes', [])
         if isinstance(self.classes, basestring):
             self.classes = self.classes.split()
@@ -63,6 +64,10 @@ class DataTable(object):
     @property
     def id(self):
         return self._meta.id
+
+    @property
+    def var(self):
+        return self._meta.var
 
     @property
     def classes(self):
@@ -142,6 +147,17 @@ class DataTable(object):
         for kv, values in colopts.items():
             aoColumnDefs.append(dict([(values['key'], values['value']), ('aTargets', values['targets'])]))
         return mark_safe(dumpjs(options, indent=4, sort_keys=True))
+
+    def extra_js(self):
+        columns = self.bound_columns().values()
+        extra = ''
+        for column in columns:
+            try:
+                extra += column.column.render_javascript(self.var, column)
+            except Exception, e:
+                #print e
+                pass
+        return mark_safe(extra)
 
     def process_request(self, request, name='datatable'):
         setattr(request, name, self)

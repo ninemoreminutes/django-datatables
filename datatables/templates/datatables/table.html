@@ -21,7 +21,12 @@
 </table>
 
 <script type="text/javascript">
+{% if table.var %}var {{ table.var }};{% endif %}
 $(document).ready(function() {
-    $('#{{ table.id }}').dataTable({{ table.js_options }});
+    {% if table.var %}{{ table.var }} = {% endif %}$('#{{ table.id }}').dataTable({{ table.js_options }});
 });
+
+{% if table.extra_js %}
+    {{ table.extra_js }}
+{% endif %}
 </script>
