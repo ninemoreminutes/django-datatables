@@ -44,6 +44,7 @@ class CheckboxColumn(Column):
         kwargs.setdefault('renderer', self.render_checkbox)
         kwargs.setdefault('label', mark_safe(u'<input type="checkbox"/>'))
         kwargs.setdefault('bSortable', False)
+        self.name = kwargs.pop('name', 'datatables_checkbox')
         super(CheckboxColumn, self).__init__(**kwargs)
 
     def render_checkbox(self, result_row, bound_column):
@@ -51,7 +52,7 @@ class CheckboxColumn(Column):
             checked = bool(lookupattr(result_row, bound_column.model_field))
         else:
             checked = False
-        return mark_safe(u'<input type="checkbox"/>')
+        return mark_safe(u'<input type="checkbox" name="' + self.name + '" value="' + str(result_row.id) + '" />')
 
 class ExpandableColumn(Column):
     
@@ -68,7 +69,6 @@ class ExpandableColumn(Column):
         return mark_safe('<img class="datatables_expand" src="%s" />' % (self.open_image))
 
     def render_javascript(self, var, bound_column):
-        print bound_column.data_table
         javascript = '''
 $(document).ready(function() {
   $('#%(id)s img.datatables_expand').live( 'click', function () {
