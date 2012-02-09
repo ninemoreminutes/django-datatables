@@ -59,7 +59,7 @@ class DataTable(object):
     __metaclass__ = DataTableDeclarativeMeta
 
     def __init__(self, data=None, name=''):
-        self.columns = deepcopy(self.base_columns)
+        self.columns = SortedDict(self.base_columns.items())#deepcopy(self.base_columns)
 
     @property
     def id(self):
