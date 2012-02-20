@@ -1,27 +1,39 @@
 # Django
 from django.utils.copycompat import deepcopy
 from django.utils.safestring import mark_safe
+from django.forms.widgets import media_property
 
 # Django-DataTables
 from utils import hungarian_to_python, lookupattr
 
 __all__ = ['Column', 'CheckboxColumn', 'ExpandableColumn']
 
+class ColumnMeta(type):
+    """Metaclass for Column class and subclass creation."""
+
+    def __new__(cls, name, bases, attrs):
+        new_class = super(ColumnMeta, cls).__new__(cls, name, bases, attrs)
+        if 'media' not in attrs:
+            new_class.media = media_property(new_class)
+        return new_class
+
 class Column(object):
     """Specify options for a Column on a DataTable."""
+
+    __metaclass__ = ColumnMeta
 
     creation_counter = 0
 
     DEFAULTS = {
+        'id': None,
+        'classes': None,
         'label': None,
         'model_field': None,
         'display_field': None,
         'sort_field': None,
         'search_field': None,
-        #'visible': True,
-        #'searchable': True,
-        #'sortable': True,
-        'renderer': None,
+        'value_renderer': None,
+        'label_renderer': None,
     }
 
     def __init__(self, **kwargs):
@@ -34,38 +46,53 @@ class Column(object):
                 pass
         for key, value in self.DEFAULTS.items():
             setattr(self, key, kwargs.get(key, value))
+        self.classes = list(self.classes or [])
+        if self.value_renderer is None:
+            self.value_renderer = getattr(self, 'render_value', None)
+        if self.label_renderer is None:
+            self.label_renderer = getattr(self, 'render_label', None)
         # Increase the creation counter, and save our local copy.
         self.creation_counter = Column.creation_counter
         Column.creation_counter += 1
 
 class CheckboxColumn(Column):
-    
+
+    class Media:
+        js = ('datatables/checkboxcolumn.js',)
+
     def __init__(self, **kwargs):
-        kwargs.setdefault('renderer', self.render_checkbox)
-        kwargs.setdefault('label', mark_safe(u'<input type="checkbox"/>'))
         kwargs.setdefault('bSortable', False)
-        self.name = kwargs.pop('name', 'datatables_checkbox')
+        self.name = kwargs.get('name', None)
         super(CheckboxColumn, self).__init__(**kwargs)
 
-    def render_checkbox(self, result_row, bound_column):
+    def render_label(self, bound_column):
+        name = self.name or bound_column.name
+        return mark_safe(u'<input type="checkbox" name="%s" value="all"/>' % name)
+
+    def render_value(self, row, bound_column):
+        name = self.name or bound_column.name
         if self.model_field:
-            checked = bool(lookupattr(result_row, bound_column.model_field))
+            checked = bool(lookupattr(row, bound_column.model_field))
         else:
             checked = False
-        return mark_safe(u'<input type="checkbox" name="' + self.name + '" value="' + str(result_row.id) + '" />')
+        return mark_safe(u'<input type="checkbox" name="%s" value="%s" />' % (name, str(row.id)))
 
 class ExpandableColumn(Column):
-    
+
+    #class Media:
+    #    js = ('datatables/expandablecolumn.js',)
+
     def __init__(self, **kwargs):
-        kwargs.setdefault('renderer', self.render_expandable)
         self.close_image = kwargs.pop('close_image', None)
         self.open_image = kwargs.pop('open_image', None)
-        kwargs.setdefault('label', mark_safe(u'<img class="datatables_expand" src="%s" />' % (self.open_image)))
         kwargs.setdefault('bSortable', False)
         self.function = kwargs.pop('function', None)
         super(ExpandableColumn, self).__init__(**kwargs)
 
-    def render_expandable(self, result_row, bound_column):
+    def render_label(self, bound_column):
+        return mark_safe(u'<img class="datatables_expand" src="%s" />' % (self.open_image))
+
+    def render_value(self, row, bound_column):
         return mark_safe('<img class="datatables_expand" src="%s" />' % (self.open_image))
 
     def render_javascript(self, var, bound_column):
@@ -85,19 +112,22 @@ $(document).ready(function() {
   });
 });
         ''' % {'var': var, 'open_image': self.open_image, 'close_image': self.close_image,
-               'function': self.function, 'id': bound_column.data_table.id}
+               'function': self.function, 'id': bound_column.datatable.id}
         return javascript
 
 class BoundColumn(object):
     """A Column bound to a particular DataTable instance."""
 
-    def __init__(self, data_table, column, name):
-        self.data_table = data_table
+    def __init__(self, datatable, column, name):
+        self.datatable = datatable
         self.column = column
         self.name = name
         self.options = deepcopy(self.column.options)
         for key in self.column.DEFAULTS.keys():
             setattr(self, key, getattr(self.column, key))
+        if self.id is None:
+            self.id = '%s-%s' % (self.datatable.id, self.name)
+        self.classes.append('datatable_col_%s' % self.name)
         if self.label is None:
             self.label = self.name.replace('_', ' ').title()
         if self.model_field is None:
@@ -113,13 +143,28 @@ class BoundColumn(object):
             self.search_field = self.model_field
         self.search_field = self.search_field.replace('.', '__')
 
-    def render(self, row, include_hidden=True):
+    @property
+    def class_value(self):
+        return ' '.join(self.classes)
+
+    def render_label(self):
+        if self.label_renderer:
+            try:
+                return self.label_renderer(self)
+            except Exception, e:
+                print e
+                return self.label
+        else:
+            return self.label
+
+    def render_value(self, row, include_hidden=True):
         if not include_hidden and not self.options.bVisible:
             return u''
-        elif self.renderer:
+        elif self.value_renderer:
             try:
-                return self.renderer(row, self)
+                value = self.value_renderer(row, self)
             except:
-                return u''
+                value = u''
         else:
-            return unicode(lookupattr(row, self.display_field))
+            value = unicode(lookupattr(row, self.display_field))
+        return value

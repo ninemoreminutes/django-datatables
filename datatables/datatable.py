@@ -6,6 +6,7 @@ from django.utils.copycompat import deepcopy
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.db.models import Q
+from django.forms.widgets import Media, media_property
 
 # Django DataTables
 from columns import Column, BoundColumn
@@ -17,18 +18,22 @@ class DataTableOptions(object):
     """Container class for DataTable options defined via the Meta class."""
 
     def __init__(self, options=None):
-        self.id = getattr(options, 'id', 'datatable_%d' % id(self))
-        self.var = getattr(options, 'var', None)
-        self.classes = getattr(options, 'classes', [])
+        self.update(options)
+
+    def update(self, options=None):
+        self.id = getattr(options, 'id', getattr(self, 'id', 'datatable_%d' % id(self)))
+        self.var = getattr(options, 'var', getattr(self, 'var', None))
+        self.classes = getattr(options, 'classes', getattr(self, 'classes', []))
         if isinstance(self.classes, basestring):
             self.classes = self.classes.split()
         self.classes = set(self.classes)
-        self.width = str(getattr(options, 'width', '100%'))
-        self.border = str(getattr(options, 'border', '0'))
-        self.cellpadding = str(getattr(options, 'cellpadding', '0'))
-        self.cellspacing = str(getattr(options, 'cellspacing', '0'))
-        self.model = getattr(options, 'model', None)
-        self.options = {}
+        self.width = str(getattr(options, 'width', getattr(self, 'width', '100%')))
+        self.border = str(getattr(options, 'border', getattr(self, 'border', '0')))
+        self.cellpadding = str(getattr(options, 'cellpadding', getattr(self, 'cellpadding', '0')))
+        self.cellspacing = str(getattr(options, 'cellspacing', getattr(self, 'cellspacing', '0')))
+        self.model = getattr(options, 'model', getattr(self, 'model', None))
+        self.options = getattr(self, 'options', {})
+        self.options.update(getattr(options, 'options', {}))
         for name in dir(options):
             if name.startswith('_'):
                 continue
@@ -49,8 +54,12 @@ class DataTableDeclarativeMeta(type):
             columns = getattr(base, 'base_columns', {}).items() + columns
         attrs['base_columns'] = SortedDict(columns)
         new_class = super(DataTableDeclarativeMeta, cls).__new__(cls, name, bases, attrs)
-        # FIXME: Need to merge superclass Meta options, if present.
-        new_class._meta = DataTableOptions(getattr(new_class, 'Meta', None))
+        new_class._meta = DataTableOptions()
+        for base in reversed(bases):
+            new_class._meta.update(getattr(base, '_meta', None))
+        new_class._meta.update(getattr(new_class, 'Meta', None))
+        if 'media' not in attrs:
+            new_class.media = media_property(new_class)
         return new_class
 
 class DataTable(object):
@@ -89,6 +98,7 @@ class DataTable(object):
     def cellspacing(self):
         return self._meta.cellspacing
 
+    @property
     def bound_columns(self):
         if not getattr(self, '_bound_columns', None):
             self._bound_columns = SortedDict([
@@ -104,11 +114,17 @@ class DataTable(object):
             return EmptyQuerySet()
 
     def get_queryset(self):
-        """Method for subclasses to override to customize the queryset."""
+        """Return the current queryset to use for this table."""
         return getattr(self, '_qs', self.get_default_queryset())
 
     def update_queryset(self, qs):
+        """Update the queryset used for this table."""
         self._qs = qs
+
+    def reset_queryset(self):
+        """Reset the queryset to the default for this table."""
+        if hasattr(self, '_qs'):
+            del self._qs
 
     def rows(self):
         if self._meta.options.get('bServerSide', False):
@@ -117,13 +133,15 @@ class DataTable(object):
             qs = self.get_queryset()
         for result in qs:
             d = SortedDict()
-            for bcol in self.bound_columns().values():
-                d[bcol.name] = bcol.render(result)
+            for bcol in self.bound_columns.values():
+                d[bcol.name] = bcol.render_value(result)
+            if 'id' not in d:
+                d['id'] = result.id
             yield d
 
     def js_options(self):
         options = deepcopy(self._meta.options)
-        columns = self.bound_columns()
+        columns = self.bound_columns
         aoColumnDefs = options.setdefault('aoColumnDefs', [])
         colopts = SortedDict()
         for index, name in enumerate(columns.keys()):
@@ -148,8 +166,15 @@ class DataTable(object):
             aoColumnDefs.append(dict([(values['key'], values['value']), ('aTargets', values['targets'])]))
         return mark_safe(dumpjs(options, indent=4, sort_keys=True))
 
+    @property
+    def media(self):
+        media = Media()
+        for bound_column in self.bound_columns.values():
+            media = media + bound_column.column.media
+        return media
+
     def extra_js(self):
-        columns = self.bound_columns().values()
+        columns = self.bound_columns.values()
         extra = ''
         for column in columns:
             try:
@@ -169,7 +194,7 @@ class DataTable(object):
             return response
 
     def _handle_ajax_sorting(self, qs, params):
-        bc = self.bound_columns()
+        bc = self.bound_columns
         sort_fields = []
         iSortingCols = params.get('iSortingCols', 0)
         for i in range(iSortingCols):
@@ -189,7 +214,7 @@ class DataTable(object):
         return qs
 
     def _handle_ajax_global_search(self, qs, params):
-        bc = self.bound_columns()
+        bc = self.bound_columns
         search_fields = []
         sSearch = params.get('sSearch', '')
         bRegex = params.get('bRegex', False)
@@ -217,7 +242,7 @@ class DataTable(object):
         return qs
 
     def _handle_ajax_column_specific_search(self, qs, params):
-        bc = self.bound_columns()
+        bc = self.bound_columns
         search_fields = []
         iColumns = params.get('iColumns', 0)
         for i in range(iColumns):
@@ -267,8 +292,8 @@ class DataTable(object):
         aaData = []
         for result in qs:
             aData = []
-            for bcol in self.bound_columns().values():
-                aData.append(bcol.render(result, include_hidden=False))
+            for bcol in self.bound_columns.values():
+                aData.append(bcol.render_value(result, include_hidden=False))
             aaData.append(aData)
         data = {
             'iTotalRecords': iTotalRecords,
