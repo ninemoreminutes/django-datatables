@@ -2,6 +2,8 @@
 from django.utils.copycompat import deepcopy
 from django.utils.safestring import mark_safe
 from django.forms.widgets import media_property
+from django.template import Context
+from django.template.loader import select_template
 
 # Django-DataTables
 from utils import hungarian_to_python, lookupattr
@@ -46,7 +48,7 @@ class Column(object):
                 pass
         for key, value in self.DEFAULTS.items():
             setattr(self, key, kwargs.get(key, value))
-        self.classes = list(self.classes or [])
+        self.classes = set(self.classes or [])
         if self.value_renderer is None:
             self.value_renderer = getattr(self, 'render_value', None)
         if self.label_renderer is None:
@@ -58,24 +60,31 @@ class Column(object):
 class CheckboxColumn(Column):
 
     class Media:
-        js = ('datatables/checkboxcolumn.js',)
+        js = ('datatables/checkbox_column.js',)
 
     def __init__(self, **kwargs):
         kwargs.setdefault('bSortable', False)
         self.name = kwargs.get('name', None)
         super(CheckboxColumn, self).__init__(**kwargs)
+        self.classes.add('datatables_checkbox_column')
+        self.template = select_template(['datatables/checkbox_column.html'])
 
-    def render_label(self, bound_column):
-        name = self.name or bound_column.name
-        return mark_safe(u'<input type="checkbox" name="%s" value="all"/>' % name)
+    def render_label(self, bc):
+        c = Context({
+            'classes': ' '.join(self.classes),
+            'name': self.name or bc.name,
+            'value': '__ALL__',
+        })
+        return mark_safe(self.template.render(c))
 
-    def render_value(self, row, bound_column):
-        name = self.name or bound_column.name
-        if self.model_field:
-            checked = bool(lookupattr(row, bound_column.model_field))
-        else:
-            checked = False
-        return mark_safe(u'<input type="checkbox" name="%s" value="%s" />' % (name, str(row.id)))
+    def render_value(self, row, bc):
+        c = Context({
+            'classes': ' '.join(self.classes),
+            'name': self.name or bc.name,
+            'value': getattr(row, 'id', ''),
+            'checked': bool(bc.model_field and lookupattr(row, bc.model_field)),
+        })
+        return mark_safe(self.template.render(c))
 
 class ExpandableColumn(Column):
 
@@ -127,7 +136,8 @@ class BoundColumn(object):
             setattr(self, key, getattr(self.column, key))
         if self.id is None:
             self.id = '%s-%s' % (self.datatable.id, self.name)
-        self.classes.append('datatable_col_%s' % self.name)
+        self.classes = set(self.classes)
+        self.classes.add('datatable_col_%s' % self.name)
         if self.label is None:
             self.label = self.name.replace('_', ' ').title()
         if self.model_field is None:
@@ -163,7 +173,8 @@ class BoundColumn(object):
         elif self.value_renderer:
             try:
                 value = self.value_renderer(row, self)
-            except:
+            except Exception, e:
+                print e
                 value = u''
         else:
             value = unicode(lookupattr(row, self.display_field))
