@@ -1,10 +1,7 @@
-{{ table.media }}
+{% load lookupattr %}{{ table.media }}
 <table id="{{ table.id }}" class="{{ table.classes }}" width="{{ table.width }}"
        border="{{ table.border }}" cellpadding="{{ table.cellpadding }}"
        cellspacing="{{ table.cellspacing }}">
-    {% for bound_column in table.bound_columns.values %}
-    <colgroup id="{{ bound_column.id }}" class="{{ bound_column.class_value }}" />
-    {% endfor %}
     <thead>
         <tr>
         {% for bound_column in table.bound_columns.values %}
@@ -15,8 +12,8 @@
     <tbody>
         {% for row in table.rows %}
         <tr>
-            {% for col in row.values %}
-            <td>{{ col }}</td>
+            {% for bound_column in table.bound_columns.values %}
+            <td class="datatable_column_{{ bound_column.name }}">{{ row|lookupattr:bound_column.name }}</td>
             {% endfor %}
         </tr>
         {% endfor %}
