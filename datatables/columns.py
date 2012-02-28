@@ -75,8 +75,8 @@ class CheckboxColumn(Column):
             'name': self.name or bc.name,
             'value': '__ALL__',
         })
-        return mark_safe(self.template.render(c))
-        #return mark_safe(select_template(['datatables/checkbox_column_label.html']).render(c))
+        #return mark_safe(self.template.render(c))
+        return mark_safe(select_template(['datatables/checkbox_column_label.html']).render(c))
 
     def render_value(self, row, bc):
         c = Context({
