@@ -1,0 +1,27 @@
+.django_datatables_tristate_checkbox div {
+    width: 13px;
+    height: 13px;
+    background: url(/static/datatables/3-state-checkbox.gif) 0 0 no-repeat;
+}
+
+.django_datatables_tristate_checkbox.all_selected div {
+    background-position: 0 -13px;
+}
+
+.django_datatables_tristate_checkbox.some_selected div {
+    background-position: 0 -26px;
+}
+
+input.datatables_checkbox_column {
+    display: none;
+}
+
+.django_datatables_bistate_checkbox div {
+    background: url(/static/datatables/3-state-checkbox.gif) 0 0 no-repeat;
+    height: 13px;
+    width: 13px;
+}
+
+.django_datatables_bistate_checkbox.checked div {
+    background-position: 0 -13px;
+}

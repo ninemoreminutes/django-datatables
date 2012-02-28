@@ -2,18 +2,22 @@ var datatables_checkbox_columns_initialized = false;
 
 $(function() {
     function header_has_been_clicked() {
-        //FIXME: Change #checkbox_header and location to be variables
-        if (($('#checkbox_header').val() == 'None') || ($('#checkbox_header').val() == 'Some')) {
-            $('#checkbox_header').val('All');
-            $('#my_span').css('color', 'red');
+        if (($('input[name="' +  $(this).attr('name')+ '_hidden"]').val() == 'None') || ($('input[name="' +  $(this).attr('name')+ '_hidden"]').val() == 'Some')) {
+            $('input[name="' +  $(this).attr('name')+ '_hidden"]').val('All');
+            $(this).addClass('all_selected').removeClass('none_selected').removeClass('some_selected');
             var checked = 'checked';
-        } else if ($('#checkbox_header').val() == 'All') {
-            $('#checkbox_header').val('None');
-            $('#my_span').css('color', 'blue');
+        } else if ($('input[name="' +  $(this).attr('name')+ '_hidden"]').val() == 'All') {
+            $('input[name="' +  $(this).attr('name')+ '_hidden"]').val('None');
+            $(this).addClass('none_selected').removeClass('all_selected').removeClass('some_selected');
             var checked = false;
         }
         checkboxes = $('div.dataTables_wrapper').find('input.datatables_checkbox_column[name="location"]');
         checkboxes.each(function(index) {
+            if (checked == 'checked') {
+                $(this).siblings('a').addClass('checked');
+            } else {
+                $(this).siblings('a').removeClass('checked');
+            }
             if ($(this).prop('checked') != checked) {
                 $(this).prop('checked', checked);
             }
@@ -23,8 +27,20 @@ $(function() {
     }
     
     function checkbox_has_been_clicked() {
-        var checked = $(this).prop('checked');
-        var original_box = $(this);
+        var checked = $(this).siblings('input').prop('checked');
+        if (checked == false) {
+            $(this).addClass('checked');
+            checked = 'checked';
+        } else {
+            $(this).removeClass('checked');
+            checked = false;
+        }
+        $(this).siblings('input:first').prop('checked', checked);
+        $(this).siblings('input').click();
+        $(this).siblings('input:first').prop('checked', checked);
+        if (checked == 'checked') {
+            checked = true;
+        }
         var unanimous = true;
         checkboxes = $('div.dataTables_wrapper').find('input.datatables_checkbox_column[name="location"]');
         checkboxes.each(function(index) {
@@ -34,21 +50,21 @@ $(function() {
         });
         if (unanimous == true) {
             if (checked == true) {
-                $('#my_span').css('color', 'red');
-                $('#checkbox_header').val('All');
+                $('a[name="' + $(this).siblings('input:first').attr('name') + '"]').addClass('all_selected').removeClass('none_selected').removeClass('some_selected');
+                $('input[name="' +  $(this).siblings('input:first').attr('name')+ '_hidden"]').val('All');
             } else {
-                $('#my_span').css('color', 'blue');
-                $('#checkbox_header').val('None');
+                $('a[name="' + $(this).siblings('input:first').attr('name') + '"]').addClass('none_selected').removeClass('all_selected').removeClass('some_selected');
+                $('input[name="' +  $(this).siblings('input:first').attr('name')+ '_hidden"]').val('None');
             }
         } else {
-            $('#my_span').css('color', 'purple');
-            $('#checkbox_header').val('Some');
+            $('a[name="' + $(this).siblings('input:first').attr('name') + '"]').addClass('some_selected').removeClass('none_selected').removeClass('all_selected');
+            $('input[name="' +  $(this).siblings('input:first').attr('name')+ '_hidden"]').val('Some');
         }
     }
     
     if (!datatables_checkbox_columns_initialized) {
-        $('a#my_span').live('click', header_has_been_clicked);
-        $('input.datatables_checkbox_column').live('click', checkbox_has_been_clicked);
+        $('a.django_datatables_tristate_checkbox').live('click', header_has_been_clicked);
+        $('a.django_datatables_bistate_checkbox').live('click', checkbox_has_been_clicked);
         datatables_checkbox_columns_initialized = true;
       }
 });

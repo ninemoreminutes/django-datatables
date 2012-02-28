@@ -61,6 +61,7 @@ class CheckboxColumn(Column):
 
     class Media:
         js = ('datatables/checkbox_column.js',)
+        css = {'all': ('datatables/checkbox_column.css',)}
 
     def __init__(self, **kwargs):
         kwargs.setdefault('bSortable', False)
