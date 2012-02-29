@@ -11,7 +11,7 @@
     </thead>
     <tbody>
         {% for row in table.rows %}
-        <tr>
+        <tr{% if row|lookupattr:'id' %} class="datatable_row-{{ row|lookupattr:'id' }}"{% endif %}>
             {% for bound_column in table.bound_columns.values %}
             <td class="datatable_column_{{ bound_column.name }}">{{ row|lookupattr:bound_column.name }}</td>
             {% endfor %}
