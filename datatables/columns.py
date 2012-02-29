@@ -101,7 +101,7 @@ class ExpandableColumn(Column):
         super(ExpandableColumn, self).__init__(**kwargs)
 
     def render_label(self, bound_column):
-        return mark_safe(u'<img class="datatables_expand" src="%s" />' % (self.open_image))
+        return ''#mark_safe(u'<img class="datatables_expand" src="%s" />' % (self.open_image))
 
     def render_value(self, row, bound_column):
         return mark_safe('<img class="datatables_expand" src="%s" />' % (self.open_image))
