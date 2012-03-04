@@ -11,7 +11,7 @@ $(function() {
             $(this).addClass('none_selected').removeClass('all_selected').removeClass('some_selected');
             var checked = false;
         }
-        checkboxes = $('div.dataTables_wrapper').find('input.datatables_checkbox_column[name="location"]');
+        checkboxes = $('div.dataTables_wrapper').find('input.datatables_checkbox_column[name="' +  $(this).attr('name') + '"]');
         checkboxes.each(function(index) {
             if (checked == 'checked') {
                 $(this).siblings('a').addClass('checked');
@@ -42,7 +42,7 @@ $(function() {
             checked = true;
         }
         var unanimous = true;
-        checkboxes = $('div.dataTables_wrapper').find('input.datatables_checkbox_column[name="location"]');
+        checkboxes = $('div.dataTables_wrapper').find('input.datatables_checkbox_column[name="' +  $(this).siblings('input:first').attr('name') + '"]');
         checkboxes.each(function(index) {
             if ($(this).prop('checked') != checked) {
                 unanimous = false;
