@@ -15,8 +15,10 @@ $(function() {
         checkboxes.each(function(index) {
             if (checked == 'checked') {
                 $(this).siblings('a').addClass('checked');
+                $(this).parents('tr').addClass('row_selected');
             } else {
                 $(this).siblings('a').removeClass('checked');
+                $(this).parents('tr').removeClass('row_selected');
             }
             if ($(this).prop('checked') != checked) {
                 $(this).prop('checked', checked);
@@ -30,9 +32,11 @@ $(function() {
         var checked = $(this).siblings('input').prop('checked');
         if (checked == false) {
             $(this).addClass('checked');
+            $(this).parents('tr').addClass('row_selected');
             checked = 'checked';
         } else {
             $(this).removeClass('checked');
+            $(this).parents('tr').removeClass('row_selected');
             checked = false;
         }
         $(this).siblings('input:first').prop('checked', checked);
