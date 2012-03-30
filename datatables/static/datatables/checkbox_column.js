@@ -67,8 +67,8 @@ $(function() {
     }
     
     if (!datatables_checkbox_columns_initialized) {
-        $('a.django_datatables_tristate_checkbox').live('click', header_has_been_clicked);
-        $('a.django_datatables_bistate_checkbox').live('click', checkbox_has_been_clicked);
+        $('a.django_datatables_tristate_checkbox').on('click', header_has_been_clicked);
+        $('a.django_datatables_bistate_checkbox').on('click', checkbox_has_been_clicked);
         datatables_checkbox_columns_initialized = true;
       }
 });
