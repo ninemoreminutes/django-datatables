@@ -2,3 +2,13 @@ The Django DataTables library provides a reusable Django application to easily
 integrate the DataTables jQuery plugin into a project.
 
 It is currently in the design and planning stage.
+
+To get started with the test_project, use the following commands to setup your
+test database and run the development server:
+
+    cd test_project
+    ./manage.py syncdb --migrate
+    ./manage.py loaddata fortunecookies
+    ./manage.py runserver
+
+Then connect to http://localhost:8000/ to view the sample datatable.

@@ -170,7 +170,7 @@ class BoundColumn(object):
             return self.label
 
     def render_value(self, row, include_hidden=True):
-        if not include_hidden and not self.options.bVisible:
+        if not include_hidden and not self.options.get('bVisible', True):
             return u''
         elif self.value_renderer:
             try:

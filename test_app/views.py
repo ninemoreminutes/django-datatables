@@ -37,7 +37,7 @@ class FortuneCookieTable(datatables.DataTable):
         )
 
     def get_queryset(self):
-        qs = self.base_queryset()
+        qs = self.get_default_queryset()
         qs = qs.extra(select={
             'fortune_lower': 'LOWER(fortune)',
         })
