@@ -3,14 +3,14 @@
 # Setuptools
 from setuptools import setup, find_packages
 
-# Read version from datatables/__init__.py
-__VERSION__ = [line for line in file('datatables/__init__.py', 'rb') \
-               if line.startswith('__VERSION__')][0].split(\
+# Read version from datatables/__init__.py (don't import)
+__version__ = [line for line in file('datatables/__init__.py', 'rb') \
+               if line.startswith('__version__')][0].split(\
                '=')[1].strip().lstrip('\'').rstrip('\'')
 
 setup(
     name='django-datatables',
-    version=__VERSION__,
+    version=__version__,
     author='Nine More Minutes, Inc.',
     author_email='support@ninemoreminutes.com',
     description='Django integration of DataTables jQuery plugin.',
@@ -23,8 +23,17 @@ setup(
     zip_safe=False,
     install_requires=['Django>=1.3', 'decorator'],
     setup_requires=[],
-    tests_require=['Django>=1.3', 'decorator', 'django-fortunecookie>=0.1.1', 'django-setuptest'],
-    test_suite='test_app.TestSuite',
+    tests_require=[
+        'decorator',
+        'Django',
+        'django-fortunecookie>=0.1.1',
+        'django-setuptest',
+        'django-debug-toolbar',
+        'django-devserver',
+        'django-extensions',
+        'South',
+    ],
+    test_suite='test_suite.TestSuite',
     classifiers=[
         'Development Status :: 1 - Planning',
         'Environment :: Web Environment',
@@ -45,8 +54,8 @@ setup(
             'source_dir': 'docs',
             'build_dir': 'docs/_build',
             'all_files': True,
-            'version': __VERSION__,
-            'release': __VERSION__,
+            'version': __version__,
+            'release': __version__,
         },
         'upload_sphinx': {
             'upload_dir': 'docs/_build/html',

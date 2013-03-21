@@ -30,6 +30,7 @@ STATIC_URL = '/static/'
 
 MIDDLEWARE_CLASSES += (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'devserver.middleware.DevServerMiddleware',
 )
 
 TEMPLATE_DIRS = (
@@ -47,6 +48,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'debug_toolbar',
+    'devserver',
+    'django_extensions',
     'south',
     'sortedm2m',
     'fortunecookie',
@@ -59,3 +62,6 @@ INTERNAL_IPS = ('127.0.0.1',)
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
+
+DEVSERVER_DEFAULT_ADDR = '127.0.0.1'
+DEVSERVER_DEFAULT_PORT = '8044'
