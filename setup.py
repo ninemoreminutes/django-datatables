@@ -1,7 +1,40 @@
 #!/usr/bin/env python
 
+# Python
+import os
+import subprocess
+import sys
+import time
+
 # Setuptools
 from setuptools import setup, find_packages
+from setuptools.command.egg_info import egg_info as _egg_info
+
+class egg_info(_egg_info):
+    """Custom egg_info class to capture revision from Subversion."""
+
+    def tags(self):
+        version = ''
+        if self.tag_build:
+            version += self.tag_build
+        if self.tag_svn_revision:# or os.path.exists('PKG-INFO'):
+            version += '-r%s' % self.get_svn_revision()
+        if self.tag_date:
+            version += time.strftime("-%Y%m%d")
+        return version
+
+    def get_svn_revision(self):
+        revision = _egg_info.get_svn_revision(self)
+        if revision == '0':
+            path = os.path.dirname(__file__)
+            try:
+                cmdline = ['svnversion', '-n', path]
+                rev = subprocess.check_output(cmdline).strip()
+                if rev and rev != 'exported' and 'unvers' not in rev.lower():
+                    revision = rev
+            except:
+                pass
+        return revision
 
 # Read version from datatables/__init__.py (don't import)
 __version__ = [line for line in file('datatables/__init__.py', 'rb') \
@@ -67,4 +100,5 @@ setup(
             'release_and_upload': 'egg_info -b "" sdist register upload',
         },
     },
+    cmdclass={'egg_info': egg_info},
 )

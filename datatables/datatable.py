@@ -102,7 +102,7 @@ class DataTable(object):
     def bound_columns(self):
         if not getattr(self, '_bound_columns', None):
             self._bound_columns = SortedDict([
-                (name, BoundColumn(self, column, name)) \
+                (name, BoundColumn(self, column, name))
                 for name, column in self.columns.items()])
         return self._bound_columns
 

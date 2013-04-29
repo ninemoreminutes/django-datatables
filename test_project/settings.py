@@ -65,3 +65,5 @@ DEBUG_TOOLBAR_CONFIG = {
 
 DEVSERVER_DEFAULT_ADDR = '127.0.0.1'
 DEVSERVER_DEFAULT_PORT = '8044'
+
+SECRET_KEY = 'gkwl+r%+^4==^(dnnkv8o#&h&bn=x43*k$h7_e7p+l0w&eba)m'

@@ -10,6 +10,7 @@ from utils import hungarian_to_python, lookupattr
 
 __all__ = ['Column', 'CheckboxColumn', 'ExpandableColumn']
 
+
 class ColumnMeta(type):
     """Metaclass for Column class and subclass creation."""
 
@@ -18,6 +19,7 @@ class ColumnMeta(type):
         if 'media' not in attrs:
             new_class.media = media_property(new_class)
         return new_class
+
 
 class Column(object):
     """Specify options for a Column on a DataTable."""
@@ -57,6 +59,7 @@ class Column(object):
         self.creation_counter = Column.creation_counter
         Column.creation_counter += 1
 
+
 class CheckboxColumn(Column):
 
     class Media:
@@ -77,16 +80,22 @@ class CheckboxColumn(Column):
             'value': '__ALL__',
         })
         #return mark_safe(self.template.render(c))
-        return mark_safe(select_template(['datatables/checkbox_column_label.html']).render(c))
+        return mark_safe(
+            select_template(
+                ['datatables/checkbox_column_label.html']
+            ).render(c)
+        )
 
     def render_value(self, row, bc):
         c = Context({
             'classes': ' '.join(self.classes),
             'name': self.name or bc.name,
             'value': getattr(row, 'id', ''),
-            'checked': bool(bc.model_field and lookupattr(row, bc.model_field)),
+            'checked': bool(bc.model_field and
+                            lookupattr(row, bc.model_field)),
         })
         return mark_safe(self.template.render(c))
+
 
 class ExpandableColumn(Column):
 
@@ -101,10 +110,13 @@ class ExpandableColumn(Column):
         super(ExpandableColumn, self).__init__(**kwargs)
 
     def render_label(self, bound_column):
-        return ''#mark_safe(u'<img class="datatables_expand" src="%s" />' % (self.open_image))
+        return ''
+        #return mark_safe(u'<img class="datatables_expand" src="%s" />'
+        #                 % (self.open_image))
 
     def render_value(self, row, bound_column):
-        return mark_safe('<img class="datatables_expand" src="%s" />' % (self.open_image))
+        return mark_safe('<img class="datatables_expand" src="%s" />'
+                         % (self.open_image))
 
     def render_javascript(self, var, bound_column):
         javascript = '''
@@ -122,9 +134,11 @@ $(document).ready(function() {
     }
   });
 });
-        ''' % {'var': var, 'open_image': self.open_image, 'close_image': self.close_image,
-               'function': self.function, 'id': bound_column.datatable.id}
+        ''' % {'var': var, 'open_image': self.open_image,
+               'close_image': self.close_image, 'function': self.function,
+               'id': bound_column.datatable.id}
         return javascript
+
 
 class BoundColumn(object):
     """A Column bound to a particular DataTable instance."""

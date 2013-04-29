@@ -8,6 +8,7 @@ from django.utils.datastructures import SortedDict
 # Django-DataTables
 import datatables
 
+
 class TestDataTables(TestCase):
     """Test cases for Django-DataTables app."""
 
@@ -27,13 +28,17 @@ class TestDataTables(TestCase):
 
     def _test_meta_options(self, **kwargs):
         dumps = json.dumps
+
         class DT(datatables.DataTable):
             Meta = type('Meta', (object,), kwargs)
+
         js_options = DT().js_options()
+        print js_options
         for name, value in kwargs.items():
             expected_js = value
             if 'fn' != name[0:2]:
                 expected_js = dumps(name) + ': ' + dumps(value, sort_keys=True)
+            print expected_js
             self.assertTrue(expected_js in js_options)
 
     def test_features(self):
@@ -63,6 +68,7 @@ class TestDataTables(TestCase):
             ['Trident', 'Internet Explorer 4.0', 'Win 95+', 4, 'X'],
             ['Trident', 'Internet Explorer 5.0', 'Win 95+', 5, 'C'],
         ]
+        print '#### RIGHT FLIPPIN HERE ####'
         self._test_meta_options(aaData=aaData)
         self._test_meta_options(aaSorting=[[2, 'asc'], [3, 'desc']])
         self._test_meta_options(aaSortingFixed=[[0, 'asc']])
@@ -101,26 +107,32 @@ class TestDataTables(TestCase):
         # http://datatables.net/usage/callbacks
         fnCookieCallback = '''function (sName, oData, sExpires, sPath) {
             /* Customise oData or sName or whatever else here */
-            return sName + "="+JSON.stringify(oData)+"; expires=" + sExpires +"; path=" + sPath;
+            return sName + "="+JSON.stringify(oData)+"; expires=" + sExpires +
+                "; path=" + sPath;
         }'''
         self._test_meta_options(fnCookieCallback=fnCookieCallback)
         fnDrawCallback = '''function(oSettings) {
             alert('DataTables has redrawn the table');
         }'''
         self._test_meta_options(fnDrawCallback=fnDrawCallback)
-        fnFooterCallback = '''function(nFoot, aasData, iStart, iEnd, aiDisplay) {
-            nFoot.getElementsByTagName('th')[0].innerHTML = "Starting index is "+iStart;
+        fnFooterCallback = '''function(nFoot, aasData, iStart, iEnd,
+            aiDisplay) {
+            nFoot.getElementsByTagName('th')[0].innerHTML = "Starting index " +
+                "is " + iStart;
         }'''
         self._test_meta_options(fnFooterCallback=fnFooterCallback)
         fnFormatNumber = '''function (iIn) {
             return iIn;
         }'''
         self._test_meta_options(fnFormatNumber=fnFormatNumber)
-        fnHeaderCallback = '''function(nHead, aasData, iStart, iEnd, aiDisplay) {
-            nHead.getElementsByTagName('th')[0].innerHTML = "Displaying "+(iEnd-iStart)+" records";
+        fnHeaderCallback = '''function(nHead, aasData, iStart, iEnd,
+            aiDisplay) {
+            nHead.getElementsByTagName('th')[0].innerHTML = "Displaying "+
+                (iEnd-iStart)+" records";
         }'''
         self._test_meta_options(fnHeaderCallback=fnHeaderCallback)
-        fnInfoCallback = '''function(oSettings, iStart, iEnd, iMax, iTotal, sPre) {
+        fnInfoCallback = '''function(oSettings, iStart, iEnd, iMax, iTotal,
+            sPre) {
             return iStart +" to "+ iEnd;
         }'''
         self._test_meta_options(fnInfoCallback=fnInfoCallback)
@@ -134,7 +146,8 @@ class TestDataTables(TestCase):
             }
         }'''
         self._test_meta_options(fnPreDrawCallback=fnPreDrawCallback)
-        fnRowCallback = '''function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+        fnRowCallback = '''function(nRow, aData, iDisplayIndex,
+            iDisplayIndexFull) {
             /* Bold the grade for all 'A' grade browsers */
             if ( aData[4] == "A" )
             {
@@ -147,10 +160,10 @@ class TestDataTables(TestCase):
             /* Add some data to send to the source, and send as 'POST' */
             aoData.push({ "name": "my_field", "value": "my_value" });
             $.ajax({
-                "dataType": 'json', 
-                "type": "POST", 
-                "url": sSource, 
-                "data": aoData, 
+                "dataType": 'json',
+                "type": "POST",
+                "url": sSource,
+                "data": aoData,
                 "success": fnCallback
             });
         }'''
@@ -177,7 +190,7 @@ class TestDataTables(TestCase):
         for index, name in enumerate(kwargs.keys()):
             options = kwargs[name]
             columns[name] = datatables.Column(**options)
-            for k,v in options.items():
+            for k, v in options.items():
                 if k not in option_values:
                     option_values[k] = []
                 if v not in [x[0] for x in option_values[k]]:
@@ -187,14 +200,18 @@ class TestDataTables(TestCase):
                         x[1].append(index)
         DT = type('DT', (datatables.DataTable,), columns)
         js_options = DT().js_options()
+        js_o = json.loads(js_options)
         for oname, ovalues in option_values.items():
             for ovalue, otargets in ovalues:
-                expected_js = dumps({
-                    'aTargets': otargets,
-                    oname: ovalue,
-                }, sort_keys=True).lstrip('{').rstrip('}').strip()
+                self.assertTrue(js_o['aoColumnDefs'][0]['aTargets'] ==
+                                otargets)
+                self.assertTrue(js_o['aoColumnDefs'][0][oname] == ovalue)
+            #    expected_js = dumps({
+            #        'aTargets': otargets,
+            #        oname: ovalue,
+            #    }, sort_keys=True).lstrip('{').rstrip('}').strip()
             #print js_options, expected_js
-            self.assertTrue(expected_js in js_options)
+            #self.assertTrue(expected_js in js_options)
 
     def test_columns(self):
         # Test that all DataTables column options are handled by the Column
@@ -226,7 +243,10 @@ class TestDataTables(TestCase):
         }
         self._test_column_options(**options)
         options = {
-            'fortune': {'fnRender': 'function (oObj) { return oObj.aData[oObj.iDataColumn]; }'},
+            'fortune': {
+                'fnRender':
+                'function (oObj) { return oObj.aData[oObj.iDataColumn];}'
+            },
             'lucky_numbers': {},
         }
         # FIXME: self._test_column_options(**options)
@@ -236,7 +256,9 @@ class TestDataTables(TestCase):
         }
         self._test_column_options(**options)
         options = {
-            'fortune': {'mDataProp': 'function(oObj) { return oObj.aData[0]; }'},
+            'fortune': {
+                'mDataProp': 'function(oObj) { return oObj.aData[0]; }'
+            },
             'lucky_numbers': {'mDataProp': None},
         }
         # FIXME: self._test_column_options(**options)
@@ -283,4 +305,6 @@ class TestDataTables(TestCase):
 
         dt = DT()
         js_options = dt.js_options()
-        self.assertTrue('"aTargets": [0], "iDataSort": 1' in js_options)
+        js_o = json.loads(js_options)
+        self.assertTrue(js_o['aoColumnDefs'][0]['aTargets'][0] == 0)
+        self.assertTrue(js_o['aoColumnDefs'][0]['iDataSort'] == 1)

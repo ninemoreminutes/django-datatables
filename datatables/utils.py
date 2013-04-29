@@ -4,6 +4,7 @@ from django.utils import simplejson
 
 __all__ = ['hungarian_to_python', 'lookupattr']
 
+
 def dumpjs(obj, *args, **kwargs):
     """Dump a Python object as Javascript, with support for a __json__ method."""
     class Encoder(simplejson.JSONEncoder):
@@ -26,21 +27,29 @@ def dumpjs(obj, *args, **kwargs):
             output = output.replace(simplejson.dumps(val), val)
     return output
 
+
 class fn(object):
     """Wrapper for a Javascript function that should be encoded without escaping."""
+
     def __init__(self, fndef):
         self.fndef = unicode(fndef)
+
     def __getattr__(self, name):
         return getattr(self.fndef, name)
+
     def __repr__(self):
         return 'fn(%r)' % self.fndef
+
     def __unicode__(self):
         return self.fndef
+
     def __json__(self):
         return unicode(self.fndef)
+
     def __deepcopy__(self, memo):
         return deepcopy(self.fndef, memo)
         #return self.__class__(deepcopy(self.fndef, memo))
+
 
 def hungarian_to_python(name, value):
     """Validate DataTable options specified in Hungarian notation."""
@@ -73,7 +82,8 @@ def hungarian_to_python(name, value):
     elif name.startswith('i') and name[1].isupper():
         return int(value)
     else:
-        raise NameError, 'name "%s" is not in hungarian notation' % name
+        raise NameError('name "%s" is not in hungarian notation' % name)
+
 
 def lookupattr(obj, name, default=None):
     """Recursively lookup an attribute or key on an object."""
