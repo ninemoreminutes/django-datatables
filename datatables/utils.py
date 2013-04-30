@@ -6,7 +6,7 @@ __all__ = ['hungarian_to_python', 'lookupattr']
 
 
 def dumpjs(obj, *args, **kwargs):
-    """Dump a Python object as Javascript, with support for a __json__ method."""
+    """Dump a Python object as Javascript, with support for __json__ method."""
     class Encoder(simplejson.JSONEncoder):
         def iterencode(self, o, _one_shot=False):
             #print o
@@ -17,7 +17,8 @@ def dumpjs(obj, *args, **kwargs):
                 else:
                     return o.__json__
             else:
-                return super(Encoder, self).iterencode(o)#, _one_shot=_one_shot)
+                return super(Encoder, self).iterencode(o)
+                #, _one_shot=_one_shot)
     kwargs['cls'] = Encoder
     kwargs['sort_keys'] = True
     #return simplejson.dumps(obj, *args, **kwargs)
@@ -29,7 +30,7 @@ def dumpjs(obj, *args, **kwargs):
 
 
 class fn(object):
-    """Wrapper for a Javascript function that should be encoded without escaping."""
+    """Wrapper for a Javascript function to be encoded without escaping."""
 
     def __init__(self, fndef):
         self.fndef = unicode(fndef)

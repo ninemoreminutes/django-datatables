@@ -3,7 +3,6 @@
 # Python
 import os
 import subprocess
-import sys
 import time
 
 # Setuptools
@@ -17,7 +16,7 @@ class egg_info(_egg_info):
         version = ''
         if self.tag_build:
             version += self.tag_build
-        if self.tag_svn_revision:# or os.path.exists('PKG-INFO'):
+        if self.tag_svn_revision:
             version += '-r%s' % self.get_svn_revision()
         if self.tag_date:
             version += time.strftime("-%Y%m%d")
@@ -68,13 +67,14 @@ setup(
     ],
     test_suite='test_suite.TestSuite',
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: JavaScript',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Software Development :: Libraries',
     ],

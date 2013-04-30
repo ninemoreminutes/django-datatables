@@ -9,10 +9,11 @@ from django.db.models import Q
 from django.forms.widgets import Media, media_property
 
 # Django DataTables
-from columns import Column, BoundColumn
-from utils import dumpjs, hungarian_to_python, lookupattr
+from .columns import Column, BoundColumn
+from .utils import dumpjs, hungarian_to_python, lookupattr
 
 __all__ = ['DataTable']
+
 
 class DataTableOptions(object):
     """Container class for DataTable options defined via the Meta class."""
@@ -21,17 +22,19 @@ class DataTableOptions(object):
         self.update(options)
 
     def update(self, options=None):
-        self.id = getattr(options, 'id', getattr(self, 'id', 'datatable_%d' % id(self)))
-        self.var = getattr(options, 'var', getattr(self, 'var', None))
-        self.classes = getattr(options, 'classes', getattr(self, 'classes', []))
+        def get_option_attr(name, default):
+            return getattr(options, name, getattr(self, name, default))
+        self.id = get_option_attr('id', 'datatable_%d' % id(self))
+        self.var = get_option_attr('var', None)
+        self.classes = get_option_attr('classes', [])
         if isinstance(self.classes, basestring):
             self.classes = self.classes.split()
         self.classes = set(self.classes)
-        self.width = str(getattr(options, 'width', getattr(self, 'width', '100%')))
-        self.border = str(getattr(options, 'border', getattr(self, 'border', '0')))
-        self.cellpadding = str(getattr(options, 'cellpadding', getattr(self, 'cellpadding', '0')))
-        self.cellspacing = str(getattr(options, 'cellspacing', getattr(self, 'cellspacing', '0')))
-        self.model = getattr(options, 'model', getattr(self, 'model', None))
+        self.width = str(get_option_attr('width', '100%'))
+        self.border = str(get_option_attr('border', '0'))
+        self.cellpadding = str(get_option_attr('cellpadding', '0'))
+        self.cellspacing = str(get_option_attr('cellspacing', '0'))
+        self.model = get_option_attr('model', None)
         self.options = getattr(self, 'options', {})
         self.options.update(getattr(options, 'options', {}))
         for name in dir(options):
@@ -43,17 +46,19 @@ class DataTableOptions(object):
             except NameError:
                 pass
 
+
 class DataTableDeclarativeMeta(type):
     """Metaclass for capturing declarative attributes on a DataTable class."""
 
     def __new__(cls, name, bases, attrs):
-        columns = [(c, attrs.pop(c)) for c, obj in attrs.items() \
-                  if isinstance(obj, Column)]
+        columns = [(c, attrs.pop(c)) for c, obj in attrs.items()
+                   if isinstance(obj, Column)]
         columns.sort(key=lambda x: x[1].creation_counter)
         for base in reversed(bases):
             columns = getattr(base, 'base_columns', {}).items() + columns
         attrs['base_columns'] = SortedDict(columns)
-        new_class = super(DataTableDeclarativeMeta, cls).__new__(cls, name, bases, attrs)
+        new_class = super(DataTableDeclarativeMeta, cls).__new__(cls, name,
+                                                                 bases, attrs)
         new_class._meta = DataTableOptions()
         for base in reversed(bases):
             new_class._meta.update(getattr(base, '_meta', None))
@@ -62,13 +67,14 @@ class DataTableDeclarativeMeta(type):
             new_class.media = media_property(new_class)
         return new_class
 
+
 class DataTable(object):
     """Base class for defining a DataTable and options."""
 
     __metaclass__ = DataTableDeclarativeMeta
 
     def __init__(self, data=None, name=''):
-        self.columns = SortedDict(self.base_columns.items())#deepcopy(self.base_columns)
+        self.columns = SortedDict(self.base_columns.items())
 
     @property
     def id(self):
@@ -150,20 +156,26 @@ class DataTable(object):
                 if not (key, str(value)) in colopts.keys():
                     colopts[(key, str(value))] = {}
                     colopts[(key, str(value))]['targets'] = []
-                colopts[(key, str(value))]['targets'] = colopts[(key, str(value))]['targets'] + [index]
+                coltargets = colopts[(key, str(value))]['targets'] + [index]
+                colopts[(key, str(value))]['targets'] = coltargets
                 colopts[(key, str(value))]['key'] = key
                 colopts[(key, str(value))]['value'] = value
-            if column.sort_field != column.display_field and column.sort_field in columns:
-                key = 'iDataSort'
-                value = columns.keys().index(column.sort_field)
-                if not (key, str(value)) in colopts.keys():
-                    colopts[(key, str(value))] = {}
-                    colopts[(key, str(value))]['targets'] = []
-                colopts[(key, str(value))]['targets'] = colopts[(key, str(value))]['targets'] + [index]
-                colopts[(key, str(value))]['key'] = key
-                colopts[(key, str(value))]['value'] = value
+            if column.sort_field not in columns:
+                continue
+            if column.sort_field == column.display_field:
+                continue
+            key = 'iDataSort'
+            value = columns.keys().index(column.sort_field)
+            if not (key, str(value)) in colopts.keys():
+                colopts[(key, str(value))] = {}
+                colopts[(key, str(value))]['targets'] = []
+            coltargets = colopts[(key, str(value))]['targets'] + [index]
+            colopts[(key, str(value))]['targets'] = coltargets
+            colopts[(key, str(value))]['key'] = key
+            colopts[(key, str(value))]['value'] = value
         for kv, values in colopts.items():
-            aoColumnDefs.append(dict([(values['key'], values['value']), ('aTargets', values['targets'])]))
+            aoColumnDefs.append(dict([(values['key'], values['value']),
+                                      ('aTargets', values['targets'])]))
         return mark_safe(dumpjs(options, indent=4, sort_keys=True))
 
     @property
@@ -186,9 +198,9 @@ class DataTable(object):
 
     def process_request(self, request, name='datatable'):
         setattr(request, name, self)
-        
+
     def process_response(self, request, response):
-        if 'sEcho' in request.GET:# and request.is_ajax():
+        if 'sEcho' in request.GET:  # and request.is_ajax():
             return self.handle_ajax(request)
         else:
             return response
@@ -223,7 +235,8 @@ class DataTable(object):
             for i in range(iColumns):
                 bcol = bc.values()[i]
                 bSearchable = params.get('bSearchable_%d' % i, True)
-                bSearchable = bSearchable and bcol.options.get('bSearchable', True)
+                bSearchable = bSearchable and bcol.options.get('bSearchable',
+                                                               True)
                 if bSearchable:
                     search_fields.append(bcol.search_field)
             qfilter = None
@@ -234,7 +247,7 @@ class DataTable(object):
                 else:
                     q = Q(**{'%s__icontains' % search_field: sSearch})
                 if qfilter is None:
-                    qfilter = q 
+                    qfilter = q
                 else:
                     qfilter |= q
             if qfilter:
@@ -260,11 +273,13 @@ class DataTable(object):
         qfilter = None
         for search_field in search_fields:
             if search_field['regex']:
-                q = Q(**{'%s__regex' % search_field['field']: search_field['term']})
+                search_key = '%s__regex' % search_field['field']
+                q = Q(**{search_key: search_field['term']})
             else:
-                q = Q(**{'%s__icontains' % search_field['field']: search_field['term']})
+                search_key = '%s__icontains' % search_field['field']
+                q = Q(**{search_key: search_field['term']})
             if qfilter is None:
-                qfilter = q 
+                qfilter = q
             else:
                 qfilter |= q
         if qfilter:
