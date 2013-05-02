@@ -1,9 +1,16 @@
 # Python
-import json
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 
 # Django
 from django.test import TestCase
+from django.test.client import Client
 from django.utils.datastructures import SortedDict
+
+# Django-FortuneCookie
+from fortunecookie.models import *
 
 # Django-DataTables
 import datatables
@@ -326,3 +333,58 @@ class TestDataTables(TestCase):
         js_o = json.loads(js_options)
         self.assertTrue(js_o['aoColumnDefs'][0]['aTargets'][0] == 0)
         self.assertTrue(js_o['aoColumnDefs'][0]['iDataSort'] == 1)
+
+    def test_server_side(self):
+        args = {
+            'sEcho': 1,
+            'iSortingCols': 1,
+            'iSortCol_0': 1,
+            'sSortDir_0': 'desc'
+        }
+        response = self.client.get('/', args)
+        data = json.loads(response.content)
+        top_item = data['aaData'][0][0]
+        second_item = data['aaData'][1][0]
+        args['sSortDir_0'] = 'asc'
+        response = self.client.get('/', args)
+        data = json.loads(response.content)
+        self.assertTrue(data['aaData'][len(data['aaData'])-1][0] == top_item)
+        args['iDisplayStart'] = 1
+        args['sSortDir_0'] = 'desc'
+        args['iDisplayLength'] = 2
+        response = self.client.get('/', args)
+        data = json.loads(response.content)
+        self.assertTrue(data['aaData'][0][0] == second_item)
+        self.assertTrue(len(data['aaData']) == args['iDisplayLength'])
+        del args['iDisplayLength']
+        del args['iDisplayStart']
+        args['iColumns'] = 4
+        args['sSearch'] = 'you'
+        args['bSearchable_0'] = True
+        args['bSearchable_1'] = False
+        args['bSearchable_2'] = False
+        args['bSearchable_3'] = False
+        args['bRegex'] = False
+        response = self.client.get('/', args)
+        data = json.loads(response.content)
+        count = FortuneCookie.objects.filter(fortune__icontains=args['sSearch']).count()
+        self.assertTrue(count == len(data['aaData']))
+        del args['sSearch']
+        args['sSearch_0'] = 'you'
+        args['bRegex_0'] = False
+        response = self.client.get('/', args)
+        data = json.loads(response.content)
+        self.assertTrue(count == len(data['aaData']))
+        args['sSearch_0'] = '^You.*$'
+        args['bRegex_0'] = True
+        count = FortuneCookie.objects.filter(fortune__regex=args['sSearch_0']).count()
+        response = self.client.get('/', args)
+        data = json.loads(response.content)
+        self.assertTrue(count == len(data['aaData']))
+        del args['sSearch_0']
+        del args['bRegex_0']
+        args['sSearch'] = '^You.*$'
+        args['bRegex'] = True
+        response = self.client.get('/', args)
+        data = json.loads(response.content)
+        self.assertTrue(count == len(data['aaData']))
