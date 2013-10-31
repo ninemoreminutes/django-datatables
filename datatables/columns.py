@@ -8,7 +8,7 @@ from django.template.loader import select_template
 # Django-DataTables
 from utils import hungarian_to_python, lookupattr
 
-__all__ = ['Column', 'CheckboxColumn', 'ExpandableColumn']
+__all__ = ['Column', 'CheckboxColumn', 'SimpleCheckboxColumn', 'ExpandableColumn']
 
 
 class ColumnMeta(type):
@@ -96,6 +96,11 @@ class CheckboxColumn(Column):
         })
         return mark_safe(self.template.render(c))
 
+class SimpleCheckboxColumn(Column):
+
+    def render_value(self, row, bc):
+        checked = bool(bc.model_field and lookupattr(row, bc.model_field))
+        return mark_safe('<input type="checkbox" value="%s" %s>' % (getattr(row, 'id', ''), 'checked' if checked else ''))
 
 class ExpandableColumn(Column):
 
