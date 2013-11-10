@@ -38,6 +38,7 @@ class Column(object):
         'search_field': None,
         'value_renderer': None,
         'label_renderer': None,
+        'url_name': None,
     }
 
     def __init__(self, **kwargs):
@@ -55,9 +56,27 @@ class Column(object):
             self.value_renderer = getattr(self, 'render_value', None)
         if self.label_renderer is None:
             self.label_renderer = getattr(self, 'render_label', None)
+        if self.url_name:            
+            parts = self.url_name.split(':')
+            if len(parts) > 1:
+                self.url_name = parts[0]
+                self.url_field = parts[1]
+            else:
+                self.url_field = 'id'
+
         # Increase the creation counter, and save our local copy.
         self.creation_counter = Column.creation_counter
         Column.creation_counter += 1
+
+    def get_absolute_url(self, row):
+        return reverse(self.url_name, args=(lookupattr(row, self.url_field),))
+
+    def render_value(self, row, bc):
+        value = lookupattr(row, bc.display_field)
+        if self.url_name:
+            value = '<a href="%s">%s</a>' % (self.get_absolute_url(row), value)
+        value = mark_safe(value)
+        return value
 
 
 class CheckboxColumn(Column):
