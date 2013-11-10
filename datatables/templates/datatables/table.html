@@ -23,7 +23,14 @@
 <script type="text/javascript">
 {% if table.var %}var {{ table.var }};{% endif %}
 $(document).ready(function() {
+    {% if table.before_js %}
+        {{ table.before_js }}
+    {% endif %}
     {% if table.var %}{{ table.var }} = {% endif %}$('#{{ table.id }}').dataTable({{ table.js_options }});
+    {% if table.after_js %}
+        {{ table.after_js }}
+    {% endif %}
+
 });
 
 {% if table.extra_js %}
