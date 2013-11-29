@@ -1,31 +1,33 @@
+# Python
+from copy import deepcopy
+
 # Django
-from django.utils.copycompat import deepcopy
-from django.utils import simplejson
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 
 __all__ = ['hungarian_to_python', 'lookupattr']
 
 
 def dumpjs(obj, *args, **kwargs):
     """Dump a Python object as Javascript, with support for __json__ method."""
-    class Encoder(simplejson.JSONEncoder):
+    class Encoder(json.JSONEncoder):
         def iterencode(self, o, _one_shot=False):
-            #print o
             if hasattr(o, '__json__'):
                 if callable(o.__json__):
-                    print 'foo', o
                     return o.__json__()
                 else:
                     return o.__json__
             else:
                 return super(Encoder, self).iterencode(o)
-                #, _one_shot=_one_shot)
     kwargs['cls'] = Encoder
     kwargs['sort_keys'] = True
-    #return simplejson.dumps(obj, *args, **kwargs)
-    output = simplejson.dumps(obj, *args, **kwargs)
+    output = json.dumps(obj, *args, **kwargs)
     for key, val in obj.items():
         if 'fn' == key[0:2]:
-            output = output.replace(simplejson.dumps(val), val)
+            # FIXME: Kind of a hack.
+            output = output.replace(json.dumps(val), val)
     return output
 
 
@@ -49,7 +51,6 @@ class fn(object):
 
     def __deepcopy__(self, memo):
         return deepcopy(self.fndef, memo)
-        #return self.__class__(deepcopy(self.fndef, memo))
 
 
 def hungarian_to_python(name, value):

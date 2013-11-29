@@ -23,7 +23,10 @@ class egg_info(_egg_info):
         return version
 
     def get_svn_revision(self):
-        revision = _egg_info.get_svn_revision(self)
+        try:
+            revision = _egg_info.get_svn_revision(self)
+        except TypeError:
+            revision = _egg_info.get_svn_revision()
         if revision == '0':
             path = os.path.dirname(__file__)
             try:

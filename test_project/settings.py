@@ -29,7 +29,7 @@ SITE_ID = 1
 STATIC_URL = '/static/'
 
 MIDDLEWARE_CLASSES += (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'devserver.middleware.DevServerMiddleware',
 )
 
@@ -43,11 +43,11 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'debug_toolbar',
+    #'debug_toolbar',
     'devserver',
     'django_extensions',
     'south',

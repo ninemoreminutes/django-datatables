@@ -1,8 +1,10 @@
 # Python
+import imp
 try:
     import json
 except ImportError:
     from django.utils import simplejson as json
+import sys
 
 # Django
 from django.test import TestCase
@@ -20,6 +22,14 @@ class TestDataTables(TestCase):
     """Test cases for Django-DataTables app."""
 
     fixtures = ['fortunecookies']
+
+    def setUp(self):
+        super(TestDataTables, self).setUp()
+        # For test coverage.
+        imp.reload(sys.modules['datatables.columns'])
+        #imp.reload(sys.modules['datatables.datatable'])
+        imp.reload(sys.modules['datatables.decorators'])
+        imp.reload(sys.modules['datatables.utils'])
 
     def test_hungarian_to_python(self):
         fndef = 'function(oSettings, json) { alert("Init Complete!"); }'
@@ -367,24 +377,24 @@ class TestDataTables(TestCase):
         args['bRegex'] = False
         response = self.client.get('/', args)
         data = json.loads(response.content)
-        count = FortuneCookie.objects.filter(fortune__icontains=args['sSearch']).count()
-        self.assertTrue(count == len(data['aaData']))
+        qs = FortuneCookie.objects.filter(fortune__icontains=args['sSearch'])
+        self.assertTrue(qs.count() == len(data['aaData']))
         del args['sSearch']
         args['sSearch_0'] = 'you'
         args['bRegex_0'] = False
         response = self.client.get('/', args)
         data = json.loads(response.content)
-        self.assertTrue(count == len(data['aaData']))
+        self.assertTrue(qs.count() == len(data['aaData']))
         args['sSearch_0'] = '^You.*$'
         args['bRegex_0'] = True
-        count = FortuneCookie.objects.filter(fortune__regex=args['sSearch_0']).count()
+        qs = FortuneCookie.objects.filter(fortune__regex=args['sSearch_0'])
         response = self.client.get('/', args)
         data = json.loads(response.content)
-        self.assertTrue(count == len(data['aaData']))
+        self.assertTrue(qs.count() == len(data['aaData']))
         del args['sSearch_0']
         del args['bRegex_0']
         args['sSearch'] = '^You.*$'
         args['bRegex'] = True
         response = self.client.get('/', args)
         data = json.loads(response.content)
-        self.assertTrue(count == len(data['aaData']))
+        self.assertTrue(qs.count() == len(data['aaData']))

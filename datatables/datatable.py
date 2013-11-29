@@ -1,8 +1,10 @@
+# Python
+from copy import deepcopy
+
 # Django
 from django.http import HttpResponse
 from django.template import Context
 from django.template.loader import select_template
-from django.utils.copycompat import deepcopy
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.db.models import Q
@@ -147,12 +149,10 @@ class DataTable(object):
 
     def js_options(self):
         options = deepcopy(self._meta.options)
-        columns = self.bound_columns
         aoColumnDefs = options.setdefault('aoColumnDefs', [])
         colopts = SortedDict()
-        for index, name in enumerate(columns.keys()):
-            column = columns[name]
-            for key, value in column.options.items():
+        for index, bcol in enumerate(self.bound_columns.values()):
+            for key, value in bcol.options.items():
                 if not (key, str(value)) in colopts.keys():
                     colopts[(key, str(value))] = {}
                     colopts[(key, str(value))]['targets'] = []
@@ -160,12 +160,12 @@ class DataTable(object):
                 colopts[(key, str(value))]['targets'] = coltargets
                 colopts[(key, str(value))]['key'] = key
                 colopts[(key, str(value))]['value'] = value
-            if column.sort_field not in columns:
+            if bcol.sort_field not in self.bound_columns:
                 continue
-            if column.sort_field == column.display_field:
+            if bcol.sort_field == bcol.display_field:
                 continue
             key = 'iDataSort'
-            value = columns.keys().index(column.sort_field)
+            value = self.bound_columns.keys().index(bcol.sort_field)
             if not (key, str(value)) in colopts.keys():
                 colopts[(key, str(value))] = {}
                 colopts[(key, str(value))]['targets'] = []

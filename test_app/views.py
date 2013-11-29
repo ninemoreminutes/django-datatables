@@ -55,8 +55,8 @@ class FortuneCookieTable(datatables.DataTable):
         aLengthMenu = [[3, 10, 25, 50, -1], [3, 10, 25, 50, "All"]]
         #fnInitComplete = '''function(oSettings, json) {
         #   alert("Init Complete!"); }'
-        bServerSide = True
-        sAjaxSource = '/'
+        #bServerSide = True
+        #sAjaxSource = '/'
         #fnServerData = '''function( sUrl, aoData, fnCallback ) {
         #    $.ajax( {
         #        "url": sUrl,

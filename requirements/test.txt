@@ -1,12 +1,12 @@
 # PIP Requirements File (for automated testing with Tox, excludes Django)
-argparse
-coverage
-decorator
-distribute
-django-debug-toolbar
-django-devserver
-django-extensions
-django-fortunecookie>=0.1.1
-https://github.com/gregmuellegger/django-setuptest/tarball/master#egg=django-setuptest
-django-sortedm2m
-South
+argparse==1.2.1
+coverage==3.7
+decorator==3.4.0
+distribute==0.7.3
+django-debug-toolbar==0.11.0
+django-devserver==0.7.0
+django-extensions==1.2.5
+django-fortunecookie==0.1.5
+django-setuptest==0.1.4
+django-sortedm2m==0.6.0
+South==0.8.4

@@ -1,14 +1,20 @@
+# Python
+from copy import deepcopy
+import logging
+
 # Django
-from django.utils.copycompat import deepcopy
 from django.utils.safestring import mark_safe
 from django.forms.widgets import media_property
 from django.template import Context
 from django.template.loader import select_template
 
 # Django-DataTables
-from utils import hungarian_to_python, lookupattr
+from .utils import hungarian_to_python, lookupattr
 
-__all__ = ['Column', 'CheckboxColumn', 'SimpleCheckboxColumn', 'ExpandableColumn']
+__all__ = ['Column', 'CheckboxColumn', 'SimpleCheckboxColumn',
+           'ExpandableColumn']
+
+logger = logging.getLogger('datatables.columns')
 
 
 class ColumnMeta(type):
@@ -46,8 +52,8 @@ class Column(object):
             try:
                 self.options[key] = hungarian_to_python(key, value)
                 kwargs.pop(key)
-            except NameError:
-                pass
+            except NameError, e:
+                logger.warning('Invalid Column argument: %r=%r', key, value)
         for key, value in self.DEFAULTS.items():
             setattr(self, key, kwargs.get(key, value))
         self.classes = set(self.classes or [])
@@ -68,7 +74,7 @@ class CheckboxColumn(Column):
 
     def __init__(self, **kwargs):
         kwargs.setdefault('bSortable', False)
-        self.name = kwargs.get('name', None)
+        self.name = kwargs.pop('name', None)
         super(CheckboxColumn, self).__init__(**kwargs)
         self.classes.add('datatables_checkbox_column')
         self.template = select_template(['datatables/checkbox_column.html'])
@@ -79,7 +85,6 @@ class CheckboxColumn(Column):
             'name': self.name or bc.name,
             'value': '__ALL__',
         })
-        #return mark_safe(self.template.render(c))
         return mark_safe(
             select_template(
                 ['datatables/checkbox_column_label.html']
@@ -96,11 +101,15 @@ class CheckboxColumn(Column):
         })
         return mark_safe(self.template.render(c))
 
+
 class SimpleCheckboxColumn(Column):
 
     def render_value(self, row, bc):
         checked = bool(bc.model_field and lookupattr(row, bc.model_field))
-        return mark_safe('<input type="checkbox" value="%s" %s>' % (getattr(row, 'id', ''), 'checked' if checked else ''))
+        value = '<input type="checkbox" value="%s" %s>' % \
+            (getattr(row, 'id', ''), 'checked' if checked else '')
+        return mark_safe(value)
+
 
 class ExpandableColumn(Column):
 
