@@ -101,15 +101,15 @@ def lookupattr(obj, name, default=None):
                     attr = obj[element]
                 except (KeyError, TypeError):
                     attr = default
+                    if callable(attr):
+                        attr = attr()
                     break
         except:
             attr = default
+            if callable(attr):
+                attr = attr()
             break
         if callable(attr):
-            obj = attr()
-        else:
-            obj = attr
-    if callable(attr):
-        return attr()
-    else:
-        return attr
+            attr = attr()
+        obj = attr
+    return attr

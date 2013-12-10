@@ -36,6 +36,7 @@ class DataTableOptions(object):
         self.border = str(get_option_attr('border', '0'))
         self.cellpadding = str(get_option_attr('cellpadding', '0'))
         self.cellspacing = str(get_option_attr('cellspacing', '0'))
+        self.jquery_var = str(get_option_attr('jquery_var', 'jQuery'))
         self.model = get_option_attr('model', None)
         self.options = getattr(self, 'options', {})
         self.options.update(getattr(options, 'options', {}))
@@ -105,6 +106,10 @@ class DataTable(object):
     @property
     def cellspacing(self):
         return self._meta.cellspacing
+
+    @property
+    def jquery_var(self):
+        return self._meta.jquery_var
 
     @property
     def bound_columns(self):

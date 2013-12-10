@@ -22,8 +22,8 @@
 
 <script type="text/javascript">
 {% if table.var %}var {{ table.var }};{% endif %}
-$(document).ready(function() {
-    {% if table.var %}{{ table.var }} = {% endif %}$('#{{ table.id }}').dataTable({{ table.js_options }});
+{{ table.jquery_var }}(function() {
+    {% if table.var %}{{ table.var }} = {% endif %}{{ table.jquery_var }}('#{{ table.id }}').dataTable({{ table.js_options }});
 });
 
 {% if table.extra_js %}
