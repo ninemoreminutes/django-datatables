@@ -29,7 +29,7 @@ SITE_ID = 1
 STATIC_URL = '/static/'
 
 MIDDLEWARE_CLASSES += (
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'devserver.middleware.DevServerMiddleware',
 )
 
@@ -47,7 +47,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    #'debug_toolbar',
+    'debug_toolbar',
     'devserver',
     'django_extensions',
     'south',
@@ -65,5 +65,18 @@ DEBUG_TOOLBAR_CONFIG = {
 
 DEVSERVER_DEFAULT_ADDR = '127.0.0.1'
 DEVSERVER_DEFAULT_PORT = '8044'
+
+DEVSERVER_MODULES = (
+    # SQLRealTimeModule is broken with Django 1.6.
+    #'devserver.modules.sql.SQLRealTimeModule',
+    'devserver.modules.sql.SQLSummaryModule',
+    'devserver.modules.profile.ProfileSummaryModule',
+
+    # Modules not enabled by default
+    #'devserver.modules.ajax.AjaxDumpModule',
+    #'devserver.modules.profile.MemoryUseModule',
+    #'devserver.modules.cache.CacheSummaryModule',
+    #'devserver.modules.profile.LineProfilerModule',
+)
 
 SECRET_KEY = 'gkwl+r%+^4==^(dnnkv8o#&h&bn=x43*k$h7_e7p+l0w&eba)m'

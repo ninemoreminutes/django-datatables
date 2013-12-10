@@ -56,7 +56,7 @@ setup(
     packages=find_packages(exclude=['test_app', 'test_project']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['Django>=1.3', 'decorator'],
+    install_requires=['Django>=1.4', 'decorator'],
     setup_requires=[],
     tests_require=[
         'decorator',
