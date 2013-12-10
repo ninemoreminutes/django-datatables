@@ -4,6 +4,14 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <title>{% block title %}{% endblock %}</title>
+  <link href="{{ STATIC_URL }}css/start/jquery-ui-1.10.3.custom{% if not debug %}.min{% endif %}.css" rel="stylesheet" type="text/css"/>
+  <link href="{{ STATIC_URL }}css/demo_table_jui.css" rel="stylesheet" type="text/css"/>
+  {% block extracss %}{% endblock %}
+  <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-1.10.2{% if not debug %}.min{% endif %}.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-migrate-1.2.1{% if not debug %}.min{% endif %}.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/jquery-ui-1.10.3.custom{% if not debug %}.min{% endif %}.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL}}js/jquery.dataTables{% if not debug %}.min{% endif %}.js"></script>
+  {% block extrajs %}{% endblock %}
   {% block extrahead %}{% endblock %}
 </head>
 <body>
