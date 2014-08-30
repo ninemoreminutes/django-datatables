@@ -27,7 +27,7 @@ class TestDataTables(TestCase):
         super(TestDataTables, self).setUp()
         # For test coverage.
         imp.reload(sys.modules['datatables.columns'])
-        #imp.reload(sys.modules['datatables.datatable'])
+        # imp.reload(sys.modules['datatables.datatable'])
         imp.reload(sys.modules['datatables.decorators'])
         imp.reload(sys.modules['datatables.utils'])
 

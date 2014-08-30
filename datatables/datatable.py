@@ -197,7 +197,7 @@ class DataTable(object):
             try:
                 extra += column.column.render_javascript(self.var, column)
             except Exception, e:
-                #print e
+                # FIXME: Log exception as warning?
                 pass
         return mark_safe(extra)
 
@@ -319,10 +319,10 @@ class DataTable(object):
             'iTotalRecords': iTotalRecords,
             'iTotalDisplayRecords': iTotalDisplayRecords,
             'sEcho': params.get('sEcho', ''),
-            #'sColumns': ,
+            # 'sColumns': ,
             'aaData': aaData,
         }
-        #print qs.query
+        # print qs.query
         s = dumpjs(data)
         return HttpResponse(s, content_type='application/json')
 

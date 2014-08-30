@@ -113,9 +113,6 @@ class SimpleCheckboxColumn(Column):
 
 class ExpandableColumn(Column):
 
-    #class Media:
-    #    js = ('datatables/expandablecolumn.js',)
-
     def __init__(self, **kwargs):
         self.close_image = kwargs.pop('close_image', None)
         self.open_image = kwargs.pop('open_image', None)
@@ -125,8 +122,6 @@ class ExpandableColumn(Column):
 
     def render_label(self, bound_column):
         return ''
-        #return mark_safe(u'<img class="datatables_expand" src="%s" />'
-        #                 % (self.open_image))
 
     def render_value(self, row, bound_column):
         return mark_safe('<img class="datatables_expand" src="%s" />'

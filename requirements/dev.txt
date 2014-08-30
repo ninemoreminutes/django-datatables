@@ -1,28 +1,28 @@
-# MacOS with Python 2.6.6 from python.org may need to use tox==1.4.2 with
 # PIP Requirements File (for a development/build environment)
+# MacOS with Python 2.6.6 from python.org may need to use tox==1.4.2 with
 # virtualenv==1.8.2 and pip==1.2.1 instead.
 argparse==1.2.1
-coverage==3.7
+coverage==3.7.1
 decorator==3.4.0
 distribute==0.7.3
-django-debug-toolbar==0.11.0
-django-devserver==0.7.0
-django-extensions==1.2.5
+django-debug-toolbar==1.2.1
+django-devserver==0.8.0
+django-extensions==1.3.11
 django-fortunecookie==0.1.5
 django-setuptest==0.1.4
-django-sortedm2m==0.6.0
-Django==1.6
-docutils==0.11
-ipython==1.1.0
-Jinja2==2.7.1
-MarkupSafe==0.18
-pep8==1.4.6
-pip-tools==0.3.4
-py==1.4.18
+django-sortedm2m==0.8.0
+Django==1.6.6
+docutils==0.12
+ipython==2.2.0
+Jinja2==2.7.3
+MarkupSafe==0.23
+pep8==1.5.7
+pip-tools==0.3.5
+py==1.4.23
 Pygments==1.6
-six==1.4.1
-South==0.8.4
-Sphinx==1.2
-sqlparse==0.1.10
-tox==1.6.1
-virtualenv==1.10.1
+six==1.7.3
+South==1.0
+Sphinx==1.2.2
+sqlparse==0.1.11
+tox==1.7.1
+virtualenv==1.11.6

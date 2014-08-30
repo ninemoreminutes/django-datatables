@@ -60,7 +60,7 @@ INSTALLED_APPS = (
 INTERNAL_IPS = ('127.0.0.1',)
 
 DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False,
+    #'INTERCEPT_REDIRECTS': False,
 }
 
 DEVSERVER_DEFAULT_ADDR = '127.0.0.1'
@@ -80,3 +80,43 @@ DEVSERVER_MODULES = (
 )
 
 SECRET_KEY = 'gkwl+r%+^4==^(dnnkv8o#&h&bn=x43*k$h7_e7p+l0w&eba)m'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+        'null': {
+            'class': 'django.utils.log.NullHandler',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'py.warnings': {
+            'handlers': ['console'],
+        },
+        'datatables': {
+            'handlers': ['console'],
+        }
+    }
+}

@@ -10,7 +10,7 @@ from fortunecookie.models import *
 
 class FortuneCookieTable(datatables.DataTable):
 
-    #pk = datatables.CheckboxColumn()
+    # pk = datatables.CheckboxColumn()
     fortune = datatables.Column(
         label='Your Fortune',
         sort_field='fortune_lower',
@@ -34,7 +34,7 @@ class FortuneCookieTable(datatables.DataTable):
         sort_field='chinese_word.english_word',
         search_field='chinese_word.english_word',
         sClass='okie',
-        #bSearchable=False,
+        # bSearchable=False,
     )
 
     def get_queryset(self):
@@ -53,17 +53,17 @@ class FortuneCookieTable(datatables.DataTable):
         sScrollY = '200px'
         aaSorting = [[2, "desc"]]
         aLengthMenu = [[3, 10, 25, 50, -1], [3, 10, 25, 50, "All"]]
-        #fnInitComplete = '''function(oSettings, json) {
-        #   alert("Init Complete!"); }'
-        #bServerSide = True
-        #sAjaxSource = '/'
-        #fnServerData = '''function( sUrl, aoData, fnCallback ) {
-        #    $.ajax( {
-        #        "url": sUrl,
-        #        "data": aoData,
-        #        "success": fnCallback,
-        #        "dataType": "jsonp",
-        #        "cache": false} );}'''
+        # fnInitComplete = '''function(oSettings, json) {
+        #    alert("Init Complete!"); }'
+        # bServerSide = True
+        # sAjaxSource = '/'
+        # fnServerData = '''function( sUrl, aoData, fnCallback ) {
+        #     $.ajax( {
+        #         "url": sUrl,
+        #         "data": aoData,
+        #         "success": fnCallback,
+        #         "dataType": "jsonp",
+        #         "cache": false} );}'''
 
 
 @datatables.datatable(FortuneCookieTable, name='fct')
